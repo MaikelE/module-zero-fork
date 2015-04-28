@@ -8,11 +8,12 @@ using ModuleZeroSampleProject.MultiTenancy;
 
 namespace ModuleZeroSampleProject.Users
 {
-    public class UserManager : AbpUserManager<Tenant, Role, User>
+    public class UserManager : AbpUserManager<Tenant, Role, User, UserTenant >
     {
         public UserManager(
             UserStore store,
             RoleManager roleManager,
+            UserTenantManager userTenantManager,
             IRepository<Tenant> tenantRepository,
             IMultiTenancyConfig multiTenancyConfig,
             IPermissionManager permissionManager,
@@ -20,6 +21,7 @@ namespace ModuleZeroSampleProject.Users
             : base(
                 store,
                 roleManager,
+            userTenantManager,
                 tenantRepository,
                 multiTenancyConfig,
                 permissionManager,

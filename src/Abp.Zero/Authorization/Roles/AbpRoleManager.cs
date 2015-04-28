@@ -18,10 +18,11 @@ namespace Abp.Authorization.Roles
     /// Extends <see cref="RoleManager{TRole,TKey}"/> of ASP.NET Identity Framework.
     /// Applications should derive this class with appropriate generic arguments.
     /// </summary>
-    public abstract class AbpRoleManager<TTenant, TRole, TUser> : RoleManager<TRole, int>, ITransientDependency
-        where TTenant : AbpTenant<TTenant, TUser>
-        where TRole : AbpRole<TTenant, TUser>, new()
-        where TUser : AbpUser<TTenant, TUser>
+    public abstract class AbpRoleManager<TTenant, TRole, TUser, TUserTenant> : RoleManager<TRole, int>, ITransientDependency
+        where TTenant : AbpTenant<TTenant, TUser,TUserTenant>
+        where TRole : AbpRole<TTenant, TUser, TUserTenant>, new()
+        where TUser : AbpUser<TTenant, TUser, TUserTenant>
+        where TUserTenant : AbpUserTenant<TTenant, TUser, TUserTenant>, new()
     {
         public ILocalizationManager LocalizationManager { get; set; }
 
@@ -29,20 +30,20 @@ namespace Abp.Authorization.Roles
         
         public IRoleManagementConfig RoleManagementConfig { get; private set; }
 
-        private IRolePermissionStore<TTenant, TRole, TUser> RolePermissionStore
+        private IRolePermissionStore<TTenant, TRole, TUser,TUserTenant> RolePermissionStore
         {
             get
             {
-                if (!(Store is IRolePermissionStore<TTenant, TRole, TUser>))
+                if (!(Store is IRolePermissionStore<TTenant, TRole, TUser,TUserTenant>))
                 {
                     throw new AbpException("Store is not IRolePermissionStore");
                 }
 
-                return Store as IRolePermissionStore<TTenant, TRole, TUser>;
+                return Store as IRolePermissionStore<TTenant, TRole, TUser,TUserTenant>;
             }
         }
 
-        protected AbpRoleStore<TTenant, TRole, TUser> AbpStore { get; private set; }
+        protected AbpRoleStore<TTenant, TRole, TUser,TUserTenant> AbpStore { get; private set; }
 
         private readonly IPermissionManager _permissionManager;
         private readonly IUnitOfWorkManager _unitOfWorkManager;
@@ -51,7 +52,7 @@ namespace Abp.Authorization.Roles
         /// Constructor.
         /// </summary>
         protected AbpRoleManager(
-            AbpRoleStore<TTenant, TRole, TUser> store, 
+            AbpRoleStore<TTenant, TRole, TUser,TUserTenant> store, 
             IPermissionManager permissionManager, 
             IRoleManagementConfig roleManagementConfig,
             IUnitOfWorkManager unitOfWorkManager)

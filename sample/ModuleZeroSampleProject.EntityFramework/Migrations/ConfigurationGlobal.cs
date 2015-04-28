@@ -3,19 +3,19 @@ using System.Collections.ObjectModel;
 using ModuleZeroSampleProject.EntityFramework;
 using ModuleZeroSampleProject.Migrations.Data;
 
-namespace ModuleZeroSampleProject.Migrations
+namespace ModuleZeroSampleProject.Migrations.GlobalDb
 {
     using System.Data.Entity.Migrations;
 
-    internal sealed class Configuration : DbMigrationsConfiguration<ModuleZeroSampleProjectDbContext>
+    internal sealed class ConfigurationGlobal : DbMigrationsConfiguration<GlobalDbContext>
     {
-        public Configuration()
+        public ConfigurationGlobal()
         {
             AutomaticMigrationsEnabled = false;
-            ContextKey = "ModuleZeroSampleProject";
+            ContextKey = "Global";
         }
 
-        protected override void Seed(ModuleZeroSampleProjectDbContext context)
+        protected override void Seed(GlobalDbContext context)
         {
             new InitialDataBuilder().Build(context);
         }

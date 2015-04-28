@@ -9,7 +9,9 @@ namespace ModuleZeroSampleProject
     {
         public override void PreInitialize()
         {
-            Configuration.DefaultNameOrConnectionString = "Default";
+            Configuration.DefaultNameOrConnectionString = "HostDb";
+            this.Configuration.MultiTenancy.IsEnabled = true;
+            this.Configuration.MultiTenancy.DefaultNameOrConnectionStringTenant = "AppDbContext";
         }
 
         public override void Initialize()

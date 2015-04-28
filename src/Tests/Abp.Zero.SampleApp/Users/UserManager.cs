@@ -8,11 +8,12 @@ using Abp.Zero.SampleApp.Roles;
 
 namespace Abp.Zero.SampleApp.Users
 {
-    public class UserManager : AbpUserManager<Tenant, Role, User>
+    public class UserManager : AbpUserManager<Tenant, Role, User,UserTenant>
     {
         public UserManager(
             UserStore userStore,
             RoleManager roleManager,
+            UserTenantManager userTenantManager,
             IRepository<Tenant> tenantRepository,
             IMultiTenancyConfig multiTenancyConfig,
             IPermissionManager permissionManager,
@@ -20,6 +21,7 @@ namespace Abp.Zero.SampleApp.Users
             : base(
             userStore,
             roleManager,
+            userTenantManager,
             tenantRepository,
             multiTenancyConfig,
             permissionManager,

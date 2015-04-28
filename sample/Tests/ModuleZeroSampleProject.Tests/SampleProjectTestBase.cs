@@ -34,6 +34,28 @@ namespace ModuleZeroSampleProject.Tests
             modules.Add<ModuleZeroSampleProjectDataModule>();
         }
 
+        public void UsingDbContext(Action<GlobalDbContext> action)
+        {
+            using (var context = LocalIocManager.Resolve<GlobalDbContext>())
+            {
+                action(context);
+                context.SaveChanges();
+            }
+        }
+
+        public T UsingDbContext<T>(Func<GlobalDbContext, T> func)
+        {
+            T result;
+
+            using (var context = LocalIocManager.Resolve<GlobalDbContext>())
+            {
+                result = func(context);
+                context.SaveChanges();
+            }
+
+            return result;
+        }
+
         public void UsingDbContext(Action<ModuleZeroSampleProjectDbContext> action)
         {
             using (var context = LocalIocManager.Resolve<ModuleZeroSampleProjectDbContext>())

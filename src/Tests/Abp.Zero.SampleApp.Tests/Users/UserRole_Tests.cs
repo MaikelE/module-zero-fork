@@ -24,7 +24,7 @@ namespace Abp.Zero.SampleApp.Tests.Users
 
                     var user1 = context.Users.Add(new User
                                                   {
-                                                      TenantId = AbpSession.TenantId,
+                                                      //TenantId = AbpSession.TenantId,
                                                       UserName = "user1",
                                                       Name = "User",
                                                       Surname = "One",
@@ -36,12 +36,33 @@ namespace Abp.Zero.SampleApp.Tests.Users
                     context.SaveChanges();
 
                     var role1 = context.Roles.Add(new Role(AbpSession.TenantId, "role1", "Role 1"));
-                    var role2 = context.Roles.Add(new Role(AbpSession.TenantId, "role2", "Role 1"));
+                    var role2 = context.Roles.Add(new Role(AbpSession.TenantId, "role2", "Role 2"));
                     context.SaveChanges();
 
                     context.UserRoles.Add(new UserRole(user1.Id, role1.Id));
                 });
         }
+
+        [Fact]
+          public async Task Should_Set_Roles()
+        {
+               var unitOfWorkManager = LocalIocManager.Resolve<IUnitOfWorkManager>();
+               using (var uow = unitOfWorkManager.Begin(new UnitOfWorkOptions { AsyncFlowOption = TransactionScopeAsyncFlowOption.Enabled }))
+               {
+                   var user = await UserManager.FindByNameAsync("user1");
+                   var setRoles = await UserManager.SetRoles(user, new[] { "role1", "role2" });
+                   setRoles.Succeeded.ShouldBe(true);
+                   await unitOfWorkManager.Current.SaveChangesAsync();
+                   var userRoles = await UserManager.GetRolesAsync(user.Id);
+                   userRoles.ShouldContain("role1");
+                   userRoles.ShouldContain("role2");
+
+                   await uow.CompleteAsync();
+               }
+
+        }
+        
+
 
         [Fact]
         public async Task Should_Change_Roles()

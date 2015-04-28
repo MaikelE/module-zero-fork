@@ -88,7 +88,7 @@ namespace Abp.Zero.SampleApp.Tests
         {
             var user = new User
                        {
-                           TenantId = AbpSession.TenantId,
+                           //TenantId = AbpSession.TenantId,
                            UserName = userName,
                            Name = userName,
                            Surname = userName,

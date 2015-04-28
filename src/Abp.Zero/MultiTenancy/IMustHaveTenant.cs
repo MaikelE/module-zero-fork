@@ -6,9 +6,10 @@ namespace Abp.MultiTenancy
     /// <summary>
     /// Implement this interface for an entity which must have Tenant.
     /// </summary>
-    public interface IMustHaveTenant<TTenant, TUser> : IMustHaveTenant
-        where TTenant : AbpTenant<TTenant, TUser>
-        where TUser : AbpUser<TTenant, TUser>
+    public interface IMustHaveTenant<TTenant, TUser, TUserTenant> : IMustHaveTenant
+        where TTenant : AbpTenant<TTenant, TUser, TUserTenant>
+        where TUser : AbpUser<TTenant, TUser, TUserTenant>
+        where TUserTenant : AbpUserTenant<TTenant, TUser, TUserTenant>
     {
         /// <summary>
         /// Tenant.

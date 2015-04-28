@@ -3,7 +3,7 @@ using ModuleZeroSampleProject.Users;
 
 namespace ModuleZeroSampleProject.Questions
 {
-    public class Answer : CreationAuditedEntity<int, User>
+    public class Answer : CreationAuditedEntity<int, User_Ref>
     {
         public virtual string Text { get; set; }
 

@@ -4,7 +4,7 @@ using ModuleZeroSampleProject.Users;
 
 namespace ModuleZeroSampleProject.Authorization
 {
-    public class PermissionChecker : PermissionChecker<Tenant, Role, User>
+    public class PermissionChecker : PermissionChecker<Tenant, Role, User,UserTenant>
     {
         public PermissionChecker(UserManager userManager)
             : base(userManager)

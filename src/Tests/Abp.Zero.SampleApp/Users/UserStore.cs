@@ -7,7 +7,7 @@ using Abp.Zero.SampleApp.Roles;
 
 namespace Abp.Zero.SampleApp.Users
 {
-    public class UserStore : AbpUserStore<Tenant, Role, User>
+    public class UserStore : AbpUserStore<Tenant, Role, User, UserTenant>
     {
         public UserStore(
             IRepository<User, long> userRepository,

@@ -25,21 +25,22 @@ namespace Abp.Authorization.Users
     /// <summary>
     /// Extends <see cref="UserManager{TUser,TKey}"/> of ASP.NET Identity Framework.
     /// </summary>
-    public abstract class AbpUserManager<TTenant, TRole, TUser> : UserManager<TUser, long>, ITransientDependency
-        where TTenant : AbpTenant<TTenant, TUser>
-        where TRole : AbpRole<TTenant, TUser>, new()
-        where TUser : AbpUser<TTenant, TUser>
+    public abstract class AbpUserManager<TTenant, TRole, TUser, TUserTenant> : UserManager<TUser, long>, ITransientDependency
+        where TTenant : AbpTenant<TTenant, TUser,TUserTenant >
+        where TRole : AbpRole<TTenant, TUser,TUserTenant>, new()
+        where TUser : AbpUser<TTenant, TUser,TUserTenant>
+        where TUserTenant : AbpUserTenant<TTenant, TUser,TUserTenant >, new()
     {
-        private IUserPermissionStore<TTenant, TUser> UserPermissionStore
+        private IUserPermissionStore<TTenant, TUser,TUserTenant> UserPermissionStore
         {
             get
             {
-                if (!(Store is IUserPermissionStore<TTenant, TUser>))
+                if (!(Store is IUserPermissionStore<TTenant, TUser,TUserTenant>))
                 {
                     throw new AbpException("Store is not IUserPermissionStore");
                 }
 
-                return Store as IUserPermissionStore<TTenant, TUser>;
+                return Store as IUserPermissionStore<TTenant, TUser,TUserTenant>;
             }
         }
 
@@ -62,10 +63,12 @@ namespace Abp.Authorization.Users
 
         public IAbpSession AbpSession { get; set; }
 
-        protected AbpRoleManager<TTenant, TRole, TUser> RoleManager { get; private set; }
+        protected AbpRoleManager<TTenant, TRole, TUser,TUserTenant> RoleManager { get; private set; }
         protected ISettingManager SettingManager { get; private set; }
         
-        protected AbpUserStore<TTenant, TRole, TUser> AbpStore { get; private set; }
+        protected AbpUserStore<TTenant, TRole, TUser,TUserTenant> AbpStore { get; private set; }
+
+        protected AbpUserTenantManager<TTenant, TUser, TUserTenant> UserTenantManager { get; private set; }
 
         private readonly IPermissionManager _permissionManager;
         private readonly IUnitOfWorkManager _unitOfWorkManager;
@@ -74,8 +77,9 @@ namespace Abp.Authorization.Users
 
         //TODO: Non-generic parameters may be converted to property-injection
         protected AbpUserManager(
-            AbpUserStore<TTenant, TRole, TUser> userStore,
-            AbpRoleManager<TTenant, TRole, TUser> roleManager,
+            AbpUserStore<TTenant, TRole, TUser,TUserTenant> userStore,
+            AbpRoleManager<TTenant, TRole, TUser,TUserTenant> roleManager,
+            AbpUserTenantManager<TTenant, TUser, TUserTenant> userTenantManager,
             IRepository<TTenant> tenantRepository,
             IMultiTenancyConfig multiTenancyConfig,
             IPermissionManager permissionManager,
@@ -84,6 +88,7 @@ namespace Abp.Authorization.Users
         {
             AbpStore = userStore;
             RoleManager = roleManager;
+            UserTenantManager = userTenantManager;
             _tenantRepository = tenantRepository;
             _multiTenancyConfig = multiTenancyConfig;
             _permissionManager = permissionManager;
@@ -101,10 +106,32 @@ namespace Abp.Authorization.Users
 
             if (AbpSession.TenantId.HasValue)
             {
-                user.TenantId = AbpSession.TenantId.Value;
+                 result = await CreateUserTenantAsync(user.Id , AbpSession.TenantId.Value);
+                 if (!result.Succeeded)
+                 {
+                     return result;
+                 }
+            }
+            else
+            {
+                result = await CreateUserTenantAsync(user.Id, null);
+                if (!result.Succeeded)
+                {
+                    return result;
+                }
             }
 
             return await base.CreateAsync(user);
+        }
+
+
+        public virtual async Task<IdentityResult> CreateUserTenantAsync(long userId, int? tenantId)
+        {
+            return  await UserTenantManager.CreateAsync(new TUserTenant()
+            {
+                UserId = userId,
+                TenantId = tenantId
+            });
         }
 
         /// <summary>
@@ -119,6 +146,8 @@ namespace Abp.Authorization.Users
                 _permissionManager.GetPermission(permissionName)
                 );
         }
+
+
 
         /// <summary>
         /// Check whether a user is granted for a permission.
@@ -372,12 +401,71 @@ namespace Abp.Authorization.Users
         public async override Task<ClaimsIdentity> CreateIdentityAsync(TUser user, string authenticationType)
         {
             var identity = await base.CreateIdentityAsync(user, authenticationType);
-            if (user.TenantId.HasValue)
+            //if (tenantId>0)
+            //{
+            //    identity.AddClaim(new Claim(AbpClaimTypes.TenantId, tenantId.ToString(CultureInfo.InvariantCulture)));              
+            //}
+            if (user.UserInTenants.Count(t => t.IsActive == true && t.IsDeleted == false) == 1)
             {
-                identity.AddClaim(new Claim(AbpClaimTypes.TenantId, user.TenantId.Value.ToString(CultureInfo.InvariantCulture)));
+                identity.AddClaim(new Claim(AbpClaimTypes.TenantId, user.UserInTenants.FirstOrDefault(t => t.IsActive == true && t.IsDeleted == false).Id.ToString(CultureInfo.InvariantCulture)));
             }
+            else
+            {
+                identity.AddClaim(new Claim(AbpClaimTypes.TenantId, "0"));
+            }
+            //var userTenants = await UserTenantManager.GetAllByUserId(user.Id );
+            //if (userTenants.Count(t => t.IsActive == true && t.IsDeleted == false) == 1)
+            //{
+            //    identity.AddClaim(new Claim(AbpClaimTypes.TenantId, userTenants.FirstOrDefault(t => t.IsActive == true && t.IsDeleted == false).Id.ToString(CultureInfo.InvariantCulture)));
+            //}
+            //else
+            //{
+            //    identity.AddClaim(new Claim(AbpClaimTypes.TenantId, "0"));
+            //}
 
             return identity;
+        }
+
+
+        public async Task<UpdateTenantResult> UpdateTenantAsync(TUser user, int tenantId, ClaimsPrincipal claimsPrincipal)
+        {
+            var identity = claimsPrincipal.Identity as ClaimsIdentity;
+            var claimTenant = identity.Claims.FirstOrDefault(c => c.Type == AbpClaimTypes.TenantId);
+
+            if (tenantId > 0)
+            {
+                var userTenant = user.UserInTenants.ToList().FirstOrDefault(ut => ut.TenantId == tenantId);
+                if (userTenant == null)
+                {
+                    return new UpdateTenantResult(AbpUpdateTenantResultType.InvalidTenancyId);
+                }
+                else
+                {
+                    if (!userTenant.IsActive || userTenant.IsDeleted)
+                        return new UpdateTenantResult(AbpUpdateTenantResultType.TenantIsNotActive);
+                }
+                //foreach (var userTenant in )
+                //{
+                //    if ()
+                //}
+                //var tenantsUser = await UserTenantManager.GetAllByUserId(user.Id);
+                //var tenantUser = tenantsUser.FirstOrDefault(ut => ut.TenantId == tenantId);
+                //if (tenantUser == null)
+                //{
+                //}
+                //else
+                //{
+                //    if (!tenantUser.IsActive || tenantUser.IsDeleted)
+                //        return new UpdateTenantResult(AbpUpdateTenantResultType.TenantIsNotActive);
+                //}
+            }
+            if (claimTenant != null)
+            {
+                identity.RemoveClaim(claimTenant);                
+            }
+            identity.AddClaim(new Claim(AbpClaimTypes.TenantId, tenantId.ToString(CultureInfo.InvariantCulture)));
+            
+            return new UpdateTenantResult(user,identity);
         }
 
         public async override Task<IdentityResult> UpdateAsync(TUser user)
@@ -389,9 +477,9 @@ namespace Abp.Authorization.Users
             }
 
             var oldUserName = Users.Where(u => u.Id == user.Id).Select(u => u.UserName).Single();
-            if (oldUserName == AbpUser<TTenant, TUser>.AdminUserName && user.UserName != AbpUser<TTenant, TUser>.AdminUserName)
+            if (oldUserName == AbpUser<TTenant, TUser,TUserTenant>.AdminUserName && user.UserName != AbpUser<TTenant, TUser,TUserTenant>.AdminUserName)
             {
-                return AbpIdentityResult.Failed(string.Format(L("CanNotRenameAdminUser"), AbpUser<TTenant, TUser>.AdminUserName));
+                return AbpIdentityResult.Failed(string.Format(L("CanNotRenameAdminUser"), AbpUser<TTenant, TUser,TUserTenant>.AdminUserName));
             }
 
             return await base.UpdateAsync(user);
@@ -399,9 +487,9 @@ namespace Abp.Authorization.Users
 
         public async override Task<IdentityResult> DeleteAsync(TUser user)
         {
-            if (user.UserName == AbpUser<TTenant, TUser>.AdminUserName)
+            if (user.UserName == AbpUser<TTenant, TUser,TUserTenant>.AdminUserName)
             {
-                return AbpIdentityResult.Failed(string.Format(L("CanNotDeleteAdminUser"), AbpUser<TTenant, TUser>.AdminUserName));
+                return AbpIdentityResult.Failed(string.Format(L("CanNotDeleteAdminUser"), AbpUser<TTenant, TUser, TUserTenant>.AdminUserName));
             }
 
             return await base.DeleteAsync(user);
@@ -489,6 +577,24 @@ namespace Abp.Authorization.Users
 
             public AbpLoginResult(TUser user, ClaimsIdentity identity)
                 : this(AbpLoginResultType.Success)
+            {
+                User = user;
+                Identity = identity;
+            }
+        }
+
+        public class UpdateTenantResult
+        {
+            public AbpUpdateTenantResultType Result { get; private set; }
+            public TUser User { get; private set; }
+            public ClaimsIdentity Identity { get; private set; }
+              public UpdateTenantResult(AbpUpdateTenantResultType result)
+            {
+                Result = result;
+            }
+
+              public UpdateTenantResult(TUser user, ClaimsIdentity identity)
+                : this(AbpUpdateTenantResultType.Success)
             {
                 User = user;
                 Identity = identity;

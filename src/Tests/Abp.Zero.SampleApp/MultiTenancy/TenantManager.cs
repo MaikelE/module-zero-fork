@@ -5,7 +5,7 @@ using Abp.Zero.SampleApp.Users;
 
 namespace Abp.Zero.SampleApp.MultiTenancy
 {
-    public class TenantManager : AbpTenantManager<Tenant, Role, User>
+    public class TenantManager : AbpTenantManager<Tenant, Role, User, UserTenant>
     {
         public TenantManager(IRepository<Tenant> tenantRepository)
             : base(tenantRepository)

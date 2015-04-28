@@ -12,6 +12,7 @@ namespace Abp.Zero.NHibernate.EntityMappings
         where TRole : AbpRole<TTenant, TUser>
         where TUser : AbpUser<TTenant, TUser>
         where TTenant : AbpTenant<TTenant, TUser>
+        where TUserTenant : AbpTenant<TTenant, TUser>
     {
         /// <summary>
         /// Constructor.

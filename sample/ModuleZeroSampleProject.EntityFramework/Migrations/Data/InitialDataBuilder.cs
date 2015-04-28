@@ -7,18 +7,19 @@ using ModuleZeroSampleProject.EntityFramework;
 using ModuleZeroSampleProject.MultiTenancy;
 using ModuleZeroSampleProject.Questions;
 using ModuleZeroSampleProject.Users;
+using Abp.MultiTenancy;
 
 namespace ModuleZeroSampleProject.Migrations.Data
 {
     public class InitialDataBuilder
     {
-        public void Build(ModuleZeroSampleProjectDbContext context)
+        public void Build(GlobalDbContext context)
         {
             context.DisableAllFilters();
             CreateUserAndRoles(context);
         }
 
-        private void CreateUserAndRoles(ModuleZeroSampleProjectDbContext context)
+        private void CreateUserAndRoles(GlobalDbContext context)
         {
             //Admin role for tenancy owner
 
@@ -31,13 +32,13 @@ namespace ModuleZeroSampleProject.Migrations.Data
 
             //Admin user for tenancy owner
 
-            var adminUserForTenancyOwner = context.Users.FirstOrDefault(u => u.TenantId == null && u.UserName == "admin");
+            var adminUserForTenancyOwner = context.Users.FirstOrDefault(u => u.UserTenants== null && u.UserName == "admin");
             if (adminUserForTenancyOwner == null)
             {
                 adminUserForTenancyOwner = context.Users.Add(
                     new User
                     {
-                        TenantId = null,
+                        
                         UserName = "admin",
                         Name = "System",
                         Surname = "Administrator",
@@ -91,13 +92,12 @@ namespace ModuleZeroSampleProject.Migrations.Data
 
             //Admin for 'Default' tenant
 
-            var adminUserForDefaultTenant = context.Users.FirstOrDefault(u => u.TenantId == defaultTenant.Id && u.UserName == "admin");
+            var adminUserForDefaultTenant = context.Users.FirstOrDefault(u => u.UserTenants.Any(ut => ut.TenantId == defaultTenant.Id) && u.UserName == "admin");
             if (adminUserForDefaultTenant == null)
             {
                 adminUserForDefaultTenant = context.Users.Add(
                     new User
                     {
-                        TenantId = defaultTenant.Id,
                         UserName = "admin",
                         Name = "System",
                         Surname = "Administrator",
@@ -105,33 +105,38 @@ namespace ModuleZeroSampleProject.Migrations.Data
                         IsEmailConfirmed = true,
                         Password = "AM4OLBpptxBYmM79lGOX9egzZk3vIQU3d/gFCJzaBjAPXzYIK3tQ2N7X4fcrHtElTw==" //123qwe
                     });
+
                 context.SaveChanges();
+
 
                 context.UserRoles.Add(new UserRole(adminUserForDefaultTenant.Id, adminRoleForDefaultTenant.Id));
                 context.UserRoles.Add(new UserRole(adminUserForDefaultTenant.Id, userRoleForDefaultTenant.Id));
                 context.SaveChanges();
 
-                var question1 = context.Questions.Add(
-                    new Question(
-                        "What's the answer of ultimate question of life the universe and everything?",
-                        "What's the answer of ultimate question of life the universe and everything? Please answer this question!"
-                        )
-                    );
-                context.SaveChanges();
+                //question1.CreatorUserId = adminUserForDefaultTenant.Id;
+                //context.SaveChanges();
+            }
 
-                question1.CreatorUserId = adminUserForDefaultTenant.Id;
+            if (context.UserTenants.FirstOrDefault(ut => ut.TenantId == defaultTenant.Id && ut.UserId == adminUserForDefaultTenant.Id) == null)
+            {
+                
+                context.UserTenants.Add(new UserTenant()
+                {
+                    UserId = adminUserForDefaultTenant.Id,
+                    TenantId = defaultTenant.Id
+                });
                 context.SaveChanges();
             }
 
             //User 'Emre' for 'Default' tenant
+            
 
-            var emreUserForDefaultTenant = context.Users.FirstOrDefault(u => u.TenantId == defaultTenant.Id && u.UserName == "emre");
+            var emreUserForDefaultTenant = context.Users.FirstOrDefault(u => u.Us.Any(ut => ut.TenantId == defaultTenant.Id) && u.UserName == "emre");
             if (emreUserForDefaultTenant == null)
             {
                 emreUserForDefaultTenant = context.Users.Add(
                     new User
                     {
-                        TenantId = defaultTenant.Id,
                         UserName = "emre",
                         Name = "Yunus Emre",
                         Surname = "Kalkan",
@@ -141,20 +146,47 @@ namespace ModuleZeroSampleProject.Migrations.Data
                     });
                 context.SaveChanges();
 
+
                 context.UserRoles.Add(new UserRole(emreUserForDefaultTenant.Id, userRoleForDefaultTenant.Id));
                 context.SaveChanges();
 
-                var question2 = context.Questions.Add(
-                    new Question(
-                        "Jquery content replacement not working within my function",
-                        @"What I am trying to achieve, and I am nearly there, is the user clicks on a checkbox and it turns green (Checkbox-active class). However, I also want the text/content of the clicked element to change to ""Activated"" and then reverts back to the original text when clicked again or on a sibling."
-                        )
-                    );
-                context.SaveChanges();
 
-                question2.CreatorUserId = emreUserForDefaultTenant.Id;
+                //question2.CreatorUserId = emreUserForDefaultTenant.Id;
+                //context.SaveChanges();
+            }
+
+            if (context.UserTenants.FirstOrDefault(ut => ut.TenantId == defaultTenant.Id && ut.UserId == emreUserForDefaultTenant.Id) == null)
+            {
+
+                context.UserTenants.Add(new UserTenant()
+                {
+                    UserId = emreUserForDefaultTenant.Id,
+                    TenantId = defaultTenant.Id
+                });
                 context.SaveChanges();
             }
+        }
+
+        public void BuildAppContext(ModuleZeroSampleProjectDbContext context)
+        {
+
+            var question2 = context.Questions.Add(
+                new Question(
+                    "Jquery content replacement not working within my function",
+                    @"What I am trying to achieve, and I am nearly there, is the user clicks on a checkbox and it turns green (Checkbox-active class). However, I also want the text/content of the clicked element to change to ""Activated"" and then reverts back to the original text when clicked again or on a sibling."
+                    )
+                );
+            context.SaveChanges();
+
+            var question1 = context.Questions.Add(
+                new Question(
+                    "What's the answer of ultimate question of life the universe and everything?",
+                    "What's the answer of ultimate question of life the universe and everything? Please answer this question!"
+                    )
+                );
+            context.SaveChanges();
+
+
         }
     }
 }

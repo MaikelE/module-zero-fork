@@ -6,7 +6,7 @@ using Abp.Zero.SampleApp.Users;
 
 namespace Abp.Zero.SampleApp.EntityFramework
 {
-    public class AppDbContext : AbpZeroDbContext<Tenant, Role, User>
+    public class AppDbContext : AbpZeroDbContext<Tenant, Role, User,UserTenant>
     {
         public AppDbContext(DbConnection connection)
             : base(connection, true)

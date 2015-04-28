@@ -20,31 +20,80 @@ namespace Abp.Zero.SampleApp.Tests.Users
             UsingDbContext(
                 context =>
                 {
-                    var tenant1 = context.Tenants.Add(new Tenant("tenant1", "Tenant one"));
-
-                    context.Users.Add(
-                        new User
+                    var tenant1 = context.Tenants.Add(new Tenant("tenant1", "Tenant one") { Id = 1 });
+                    var user1 =  new User
                         {
-                            Tenant = null, //Tenancy owner
+                           Id=1,
                             UserName = "userOwner",
                             Name = "Owner",
                             Surname = "One",
                             EmailAddress = "owner@aspnetboilerplate.com",
                             IsEmailConfirmed = true,
                             Password = "AM4OLBpptxBYmM79lGOX9egzZk3vIQU3d/gFCJzaBjAPXzYIK3tQ2N7X4fcrHtElTw==" //123qwe
+                        };
+
+                    context.Users.Add(user1);
+
+                    var userOwner_TenantNull = context.UserTenants.Add(new UserTenant()
+                        {
+                            Id=2,
+                            User = user1,
+                            Tenant  = null
                         });
 
-                    context.Users.Add(
-                        new User
+                    var user2 = new User
                         {
-                            Tenant = tenant1, //A user of tenant1
+                            Id = 2,
                             UserName = "user1",
                             Name = "User",
                             Surname = "One",
                             EmailAddress = "user-one@aspnetboilerplate.com",
                             IsEmailConfirmed = false,
                             Password = "AM4OLBpptxBYmM79lGOX9egzZk3vIQU3d/gFCJzaBjAPXzYIK3tQ2N7X4fcrHtElTw==" //123qwe
-                        });
+                        };
+
+                    context.Users.Add(user2);
+
+                    var user1_Tenant1 = context.UserTenants.Add(new UserTenant()
+                    {
+                        Id = 3,
+                        UserId = 2,
+                        User = user2,
+                        TenantId = 1,
+                        Tenant = tenant1
+                    });
+
+
+                    var user3 = new User
+                    {
+                        Id = 3,
+                        UserName = "user3",
+                        Name = "User3",
+                        Surname = "One3",
+                        EmailAddress = "user-3@aspnetboilerplate.com",
+                        IsEmailConfirmed = false,
+                        Password = "AM4OLBpptxBYmM79lGOX9egzZk3vIQU3d/gFCJzaBjAPXzYIK3tQ2N7X4fcrHtElTw==" //123qwe
+                    };
+
+                    context.Users.Add(user3);
+
+                    context.UserTenants.Add(new UserTenant()
+                    {
+                        Id = 4,
+                        UserId = 3,
+                        User = user3,
+                        TenantId = 1,
+                        Tenant = tenant1
+                    });
+
+                    context.UserTenants.Add(new UserTenant()
+                    {
+                        Id = 5,
+                        UserId = 3,
+                        User = user3,
+                        Tenant = null
+                    });
+
                 });
 
             _userManager = LocalIocManager.Resolve<UserManager>();

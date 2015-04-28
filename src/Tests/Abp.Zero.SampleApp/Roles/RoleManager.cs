@@ -7,7 +7,7 @@ using Abp.Zero.SampleApp.Users;
 
 namespace Abp.Zero.SampleApp.Roles
 {
-    public class RoleManager : AbpRoleManager<Tenant, Role, User>
+    public class RoleManager : AbpRoleManager<Tenant, Role, User, UserTenant>
     {
         public RoleManager(RoleStore store, IPermissionManager permissionManager, IRoleManagementConfig roleManagementConfig, IUnitOfWorkManager unitOfWorkManager)
             : base(store, permissionManager, roleManagementConfig, unitOfWorkManager)

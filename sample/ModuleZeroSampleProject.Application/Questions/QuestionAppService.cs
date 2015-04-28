@@ -110,7 +110,7 @@ namespace ModuleZeroSampleProject.Questions
         public SubmitAnswerOutput SubmitAnswer(SubmitAnswerInput input)
         {
             var question = _questionRepository.Get(input.QuestionId);
-            var currentUser = _userRepository.Get(CurrentSession.GetUserId());
+            var currentUser = _userRepository.Get(AbpSession.GetUserId());
 
             question.AnswerCount++;
 
@@ -118,7 +118,7 @@ namespace ModuleZeroSampleProject.Questions
                 new Answer(input.Text)
                 {
                     Question = question,
-                    CreatorUser = currentUser
+                    CreatorUser = new User_Ref() { Id = currentUser.Id }
                 });
 
             _unitOfWorkManager.Current.SaveChanges();

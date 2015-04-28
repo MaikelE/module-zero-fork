@@ -16,7 +16,7 @@ namespace Abp.Zero.SampleApp.Tests.Users
 
             userRepository.Insert(new User
             {
-                TenantId = null,
+                //TenantId = null,
                 UserName = "admin",
                 Name = "System",
                 Surname = "Administrator",

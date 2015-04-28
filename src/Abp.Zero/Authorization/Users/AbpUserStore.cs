@@ -14,17 +14,18 @@ namespace Abp.Authorization.Users
     /// <summary>
     /// Implements 'User Store' of ASP.NET Identity Framework.
     /// </summary>
-    public abstract class AbpUserStore<TTenant, TRole, TUser> :
+    public abstract class AbpUserStore<TTenant, TRole, TUser, TUserTenant> :
         IUserPasswordStore<TUser, long>,
         IUserEmailStore<TUser, long>,
         IUserLoginStore<TUser, long>,
         IUserRoleStore<TUser, long>,
         IQueryableUserStore<TUser, long>,
-        IUserPermissionStore<TTenant, TUser>,
+        IUserPermissionStore<TTenant, TUser, TUserTenant>,
         ITransientDependency
-        where TTenant : AbpTenant<TTenant, TUser>
-        where TRole : AbpRole<TTenant, TUser>
-        where TUser : AbpUser<TTenant, TUser>
+        where TTenant : AbpTenant<TTenant, TUser, TUserTenant>
+        where TRole : AbpRole<TTenant, TUser, TUserTenant>
+        where TUser : AbpUser<TTenant, TUser, TUserTenant>
+        where TUserTenant : AbpUserTenant<TTenant, TUser, TUserTenant>
     {
         private readonly IRepository<TUser, long> _userRepository;
         private readonly IRepository<UserLogin, long> _userLoginRepository;
@@ -112,11 +113,14 @@ namespace Abp.Authorization.Users
         {
             using (_unitOfWorkManager.Current.DisableFilter(AbpDataFilters.MayHaveTenant))
             {
-                return await _userRepository.FirstOrDefaultAsync(
-                    user =>
-                        user.TenantId == tenantId &&
+                return await _userRepository.FirstOrDefaultAsync(user =>
                         (user.UserName == userNameOrEmailAddress || user.EmailAddress == userNameOrEmailAddress)
-                    );
+                         && (user.UserInTenants.FirstOrDefault(ut => ut.TenantId == tenantId) != null));
+
+                   //var Usertenants = users.FirstOrDefault().UserTenants;
+                
+                
+                   //return users.FirstOrDefault(u => u.UserTenants != null && u.UserTenants.FirstOrDefault(ut => ut.TenantId == tenantId) != null);            
             }
         }
 

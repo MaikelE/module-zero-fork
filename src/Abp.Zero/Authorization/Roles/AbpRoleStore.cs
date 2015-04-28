@@ -13,13 +13,14 @@ namespace Abp.Authorization.Roles
     /// <summary>
     /// Implements 'Role Store' of ASP.NET Identity Framework.
     /// </summary>
-    public abstract class AbpRoleStore<TTenant, TRole, TUser> :
+    public abstract class AbpRoleStore<TTenant, TRole, TUser, TUserTenant> :
         IQueryableRoleStore<TRole, int>,
-        IRolePermissionStore<TTenant, TRole, TUser>,
+        IRolePermissionStore<TTenant, TRole, TUser,TUserTenant>,
         ITransientDependency
-        where TRole : AbpRole<TTenant, TUser>
-        where TUser : AbpUser<TTenant, TUser>
-        where TTenant : AbpTenant<TTenant, TUser>
+        where TRole : AbpRole<TTenant, TUser, TUserTenant>
+        where TUser : AbpUser<TTenant, TUser, TUserTenant>
+        where TTenant : AbpTenant<TTenant, TUser, TUserTenant>
+        where TUserTenant : AbpUserTenant<TTenant, TUser, TUserTenant>
     {
         private readonly IRepository<TRole> _roleRepository;
         private readonly IRepository<RolePermissionSetting, long> _rolePermissionSettingRepository;

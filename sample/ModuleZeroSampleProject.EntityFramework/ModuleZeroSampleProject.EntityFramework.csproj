@@ -34,19 +34,19 @@
   <ItemGroup>
     <Reference Include="Abp, Version=0.5.12.1, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Abp.0.5.12.1\lib\net451\Abp.dll</HintPath>
+      <HintPath>..\..\..\aspnetboilerplate\src\Abp.EntityFramework\bin\Debug\Abp.dll</HintPath>
     </Reference>
-    <Reference Include="Abp.EntityFramework, Version=0.5.12.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Abp.EntityFramework, Version=0.5.12.1, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Abp.EntityFramework.0.5.12.0\lib\net451\Abp.EntityFramework.dll</HintPath>
+      <HintPath>..\..\..\aspnetboilerplate\src\Abp.EntityFramework\bin\Debug\Abp.EntityFramework.dll</HintPath>
     </Reference>
     <Reference Include="Abp.Zero, Version=0.5.15.1, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Abp.Zero.0.5.15.1\lib\net451\Abp.Zero.dll</HintPath>
+      <HintPath>..\..\src\Abp.Zero.EntityFramework\bin\Debug\Abp.Zero.dll</HintPath>
     </Reference>
     <Reference Include="Abp.Zero.EntityFramework, Version=0.5.15.1, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Abp.Zero.EntityFramework.0.5.15.1\lib\net451\Abp.Zero.EntityFramework.dll</HintPath>
+      <HintPath>..\..\src\Abp.Zero.EntityFramework\bin\Debug\Abp.Zero.EntityFramework.dll</HintPath>
     </Reference>
     <Reference Include="Castle.Core, Version=3.3.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -106,41 +106,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EntityFramework\GlobalDbContext.cs" />
     <Compile Include="EntityFramework\ModuleZeroSampleProjectDbContext.cs" />
+    <Compile Include="EntityFramework\Repositories\GlobalRepositoryBase.cs" />
     <Compile Include="EntityFramework\Repositories\ModuleZeroSampleProjectRepositoryBase.cs" />
-    <Compile Include="Migrations\201411072219476_Create_AbpZero_Tables.cs" />
-    <Compile Include="Migrations\201411072219476_Create_AbpZero_Tables.Designer.cs">
-      <DependentUpon>201411072219476_Create_AbpZero_Tables.cs</DependentUpon>
+    <Compile Include="Migrations\201504221236306_UpdateConfigurationModuleZeroSample.cs" />
+    <Compile Include="Migrations\201504221236306_UpdateConfigurationModuleZeroSample.Designer.cs">
+      <DependentUpon>201504221236306_UpdateConfigurationModuleZeroSample.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201411082145343_Created_Message_Entities.cs" />
-    <Compile Include="Migrations\201411082145343_Created_Message_Entities.Designer.cs">
-      <DependentUpon>201411082145343_Created_Message_Entities.cs</DependentUpon>
+    <Compile Include="Migrations\201504221312353_Update.cs" />
+    <Compile Include="Migrations\201504221312353_Update.Designer.cs">
+      <DependentUpon>201504221312353_Update.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201411090940054_Modified_Message_Entity.cs" />
-    <Compile Include="Migrations\201411090940054_Modified_Message_Entity.Designer.cs">
-      <DependentUpon>201411090940054_Modified_Message_Entity.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201411092108213_Removed_Message_Class.cs" />
-    <Compile Include="Migrations\201411092108213_Removed_Message_Class.Designer.cs">
-      <DependentUpon>201411092108213_Removed_Message_Class.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201501272022518_ModuleZero_Upgrade_Pre_5_1.cs" />
-    <Compile Include="Migrations\201501272022518_ModuleZero_Upgrade_Pre_5_1.Designer.cs">
-      <DependentUpon>201501272022518_ModuleZero_Upgrade_Pre_5_1.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201503061936097_Rename_IsSuspended_To_IsActive.cs" />
-    <Compile Include="Migrations\201503061936097_Rename_IsSuspended_To_IsActive.Designer.cs">
-      <DependentUpon>201503061936097_Rename_IsSuspended_To_IsActive.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201504041938221_Upgraded_To_AbpZero_0_5_13.cs" />
-    <Compile Include="Migrations\201504041938221_Upgraded_To_AbpZero_0_5_13.Designer.cs">
-      <DependentUpon>201504041938221_Upgraded_To_AbpZero_0_5_13.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201504161031267_Abp_Upgrade_0_5_12.cs" />
-    <Compile Include="Migrations\201504161031267_Abp_Upgrade_0_5_12.Designer.cs">
-      <DependentUpon>201504161031267_Abp_Upgrade_0_5_12.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Migrations\ConfigurationGlobal.cs" />
+    <Compile Include="Migrations\ConfigurationModuleZeroSample.cs" />
     <Compile Include="Migrations\Data\InitialDataBuilder.cs" />
     <Compile Include="ModuleZeroSampleProjectDataModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -156,29 +135,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201411072219476_Create_AbpZero_Tables.resx">
-      <DependentUpon>201411072219476_Create_AbpZero_Tables.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201504221236306_UpdateConfigurationModuleZeroSample.resx">
+      <DependentUpon>201504221236306_UpdateConfigurationModuleZeroSample.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201411082145343_Created_Message_Entities.resx">
-      <DependentUpon>201411082145343_Created_Message_Entities.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201411090940054_Modified_Message_Entity.resx">
-      <DependentUpon>201411090940054_Modified_Message_Entity.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201411092108213_Removed_Message_Class.resx">
-      <DependentUpon>201411092108213_Removed_Message_Class.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201501272022518_ModuleZero_Upgrade_Pre_5_1.resx">
-      <DependentUpon>201501272022518_ModuleZero_Upgrade_Pre_5_1.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201503061936097_Rename_IsSuspended_To_IsActive.resx">
-      <DependentUpon>201503061936097_Rename_IsSuspended_To_IsActive.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201504041938221_Upgraded_To_AbpZero_0_5_13.resx">
-      <DependentUpon>201504041938221_Upgraded_To_AbpZero_0_5_13.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201504161031267_Abp_Upgrade_0_5_12.resx">
-      <DependentUpon>201504161031267_Abp_Upgrade_0_5_12.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201504221312353_Update.resx">
+      <DependentUpon>201504221312353_Update.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

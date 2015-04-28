@@ -8,6 +8,7 @@ using Abp.IdentityFramework;
 using Abp.Localization;
 using Abp.Zero;
 using Microsoft.AspNet.Identity;
+using Abp.MultiTenancy;
 
 namespace Abp.MultiTenancy
 {
@@ -18,10 +19,11 @@ namespace Abp.MultiTenancy
     /// <typeparam name="TTenant">Type of the application Tenant</typeparam>
     /// <typeparam name="TRole">Type of the application Role</typeparam>
     /// <typeparam name="TUser">Type of the application User</typeparam>
-    public abstract class AbpTenantManager<TTenant, TRole, TUser> : ITransientDependency
-        where TTenant : AbpTenant<TTenant, TUser>
-        where TRole : AbpRole<TTenant, TUser>
-        where TUser : AbpUser<TTenant, TUser>
+    public abstract class AbpTenantManager<TTenant, TRole, TUser, TUserTenant> : ITransientDependency
+        where TTenant : AbpTenant<TTenant, TUser, TUserTenant>
+        where TRole : AbpRole<TTenant, TUser, TUserTenant>
+        where TUser : AbpUser<TTenant, TUser, TUserTenant>
+        where TUserTenant : AbpUserTenant<TTenant, TUser, TUserTenant>
     {
         public ILocalizationManager LocalizationManager { get; set; }
 
@@ -102,7 +104,7 @@ namespace Abp.MultiTenancy
 
         protected virtual async Task<IdentityResult> ValidateTenancyNameAsync(string tenancyName)
         {
-            if (!Regex.IsMatch(tenancyName, AbpTenant<TTenant, TUser>.TenancyNameRegex))
+            if (!Regex.IsMatch(tenancyName, AbpTenant<TTenant, TUser,TUserTenant>.TenancyNameRegex))
             {
                 return AbpIdentityResult.Failed(L("InvalidTenancyName"));
             }

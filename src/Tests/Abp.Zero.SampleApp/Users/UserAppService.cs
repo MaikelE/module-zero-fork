@@ -16,7 +16,7 @@ namespace Abp.Zero.SampleApp.Users
         {
             _userRepository.Insert(new User
                                    {
-                                       TenantId = null,
+                                       //TenantId = null,
                                        UserName = input.UserName,
                                        Name = input.Name,
                                        Surname = input.Surname,

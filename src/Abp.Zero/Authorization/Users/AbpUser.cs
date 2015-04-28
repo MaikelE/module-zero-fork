@@ -15,9 +15,10 @@ namespace Abp.Authorization.Users
     /// Represents a user.
     /// </summary>
     [Table("AbpUsers")]
-    public class AbpUser<TTenant, TUser> : FullAuditedEntity<long, TUser>, IUser<long>, IMayHaveTenant<TTenant, TUser>, IPassivable
-        where TTenant : AbpTenant<TTenant, TUser>
-        where TUser : AbpUser<TTenant, TUser>
+    public class AbpUser<TTenant, TUser, TUserTenant> : FullAuditedEntity<long, TUser>, IUser<long>, /*IMayHaveTenant<TTenant, TUser>,*/ IPassivable
+        where TTenant : AbpTenant<TTenant, TUser, TUserTenant>
+        where TUser : AbpUser<TTenant, TUser, TUserTenant>
+        where TUserTenant : AbpUserTenant<TTenant, TUser, TUserTenant>
     {
         /// <summary>
         /// UserName of the admin.
@@ -65,16 +66,7 @@ namespace Abp.Authorization.Users
         /// </summary>
         public const int MaxPasswordResetCodeLength = 128;
 
-        /// <summary>
-        /// Tenant of this user.
-        /// </summary>
-        [ForeignKey("TenantId")]
-        public virtual TTenant Tenant { get; set; }
-
-        /// <summary>
-        /// Tenant Id of this user.
-        /// </summary>
-        public virtual int? TenantId { get; set; }
+    
 
         /// <summary>
         /// Name of the user.
@@ -166,6 +158,22 @@ namespace Abp.Authorization.Users
         /// </summary>
         [ForeignKey("UserId")]
         public virtual ICollection<Setting> Settings { get; set; }
+
+        ///// <summary>
+        ///// Tenant of this user.
+        ///// </summary>
+        //[ForeignKey("TenantId")]
+        //public virtual TTenant Tenant { get; set; }
+
+        ///// <summary>
+        ///// Tenant Id of this user.
+        ///// </summary>
+        //public virtual int? TenantId { get; set; }
+        /// <summary>
+        /// Relation with tenants
+        /// </summary>
+        [ForeignKey("UserId")]
+        public virtual ICollection<TUserTenant> UserInTenants { get; set; }
 
         public AbpUser()
         {

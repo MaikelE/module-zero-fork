@@ -4,7 +4,7 @@ using ModuleZeroSampleProject.Users;
 
 namespace ModuleZeroSampleProject.Questions
 {
-    public class Question : CreationAuditedEntity<int, User>
+    public class Question : CreationAuditedEntity<int, User_Ref>
     {
         public virtual string Title { get; set; }
 

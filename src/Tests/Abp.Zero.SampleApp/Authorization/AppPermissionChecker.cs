@@ -5,7 +5,7 @@ using Abp.Zero.SampleApp.Users;
 
 namespace Abp.Zero.SampleApp.Authorization
 {
-    public class AppPermissionChecker : PermissionChecker<Tenant, Role, User>
+    public class AppPermissionChecker : PermissionChecker<Tenant, Role, User,UserTenant>
     {
         public AppPermissionChecker(UserManager userManager)
             : base(userManager)

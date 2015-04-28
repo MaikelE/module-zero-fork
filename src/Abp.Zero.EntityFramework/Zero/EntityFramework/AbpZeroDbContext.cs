@@ -7,16 +7,21 @@ using Abp.Authorization.Users;
 using Abp.Configuration;
 using Abp.EntityFramework;
 using Abp.MultiTenancy;
+using EntityFramework.DynamicFilters;
+using System.Linq;
+using Abp.Domain.Uow;
+using Abp.Uow;
 
 namespace Abp.Zero.EntityFramework
 {
     /// <summary>
     /// DbContext for ABP zero.
     /// </summary>
-    public abstract class AbpZeroDbContext<TTenant, TRole, TUser> : AbpDbContext
-        where TRole : AbpRole<TTenant, TUser>
-        where TTenant : AbpTenant<TTenant, TUser>
-        where TUser : AbpUser<TTenant, TUser>
+    public abstract class AbpZeroDbContext<TTenant, TRole, TUser, TUserTenant> : AbpDbContext
+        where TRole : AbpRole<TTenant, TUser,TUserTenant>
+        where TTenant : AbpTenant<TTenant, TUser, TUserTenant>
+        where TUser : AbpUser<TTenant, TUser, TUserTenant>
+        where TUserTenant : AbpUserTenant<TTenant, TUser, TUserTenant>
     {
         /// <summary>
         /// Tenants
@@ -69,6 +74,11 @@ namespace Abp.Zero.EntityFramework
         public virtual IDbSet<AuditLog> AuditLogs { get; set; }
 
         /// <summary>
+        /// Tenants
+        /// </summary>
+        public virtual IDbSet<TUserTenant> UserTenants { get; set; }
+
+        /// <summary>
         /// Default constructor.
         /// Do not directly instantiate this class. Instead, use dependency injection!
         /// </summary>
@@ -94,6 +104,23 @@ namespace Abp.Zero.EntityFramework
             : base(dbConnection, contextOwnsConnection)
         {
             
+        }
+
+        public override void Initialize()
+        {
+            base.Initialize();
+            Database.Initialize(false);
+
+            //this.SetFilterScopedParameterValue(ZeroDataFilters.MayHaveOneOrMoreTenants, AbpDataFilters.Parameters.TenantId, AbpSession.TenantId ?? 0);
+            //this.SetFilterScopedParameterValue(ZeroDataFilters.MustHaveOneOrMoreTenants, AbpDataFilters.Parameters.TenantId, AbpSession.TenantId);
+        }
+
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+           // modelBuilder.Filter(ZeroDataFilters.MayHaveOneOrMoreTenants, (IMayHaveOneOrMoreTenant<TTenant, TUser> mut, int? tenantId) => mut.UserTenants.Any(ut => ut.TenantId == tenantId), 0);
+           // modelBuilder.Filter(ZeroDataFilters.MustHaveOneOrMoreTenants, (IMustHaveOneOrMoreTenant<TTenant, TUser> mut, int tenantId) => mut.UserTenants.Any(ut => ut.TenantId == tenantId), 0);
+
         }
     }
 }

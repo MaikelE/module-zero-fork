@@ -16,10 +16,11 @@ namespace Abp.Authorization.Users
         /// <param name="manager">User manager</param>
         /// <param name="userId">User id</param>
         /// <param name="permissionName">Permission name</param>
-        public static bool IsGranted<TTenant, TRole, TUser>(AbpUserManager<TTenant, TRole, TUser> manager, long userId, string permissionName)
-            where TTenant : AbpTenant<TTenant, TUser>
-            where TRole : AbpRole<TTenant, TUser>, new()
-            where TUser : AbpUser<TTenant, TUser>
+        public static bool IsGranted<TTenant, TRole, TUser, TUserTenant>(AbpUserManager<TTenant, TRole, TUser, TUserTenant> manager, long userId, string permissionName)
+            where TTenant : AbpTenant<TTenant, TUser,TUserTenant >
+            where TRole : AbpRole<TTenant, TUser, TUserTenant>, new()
+            where TUser : AbpUser<TTenant, TUser, TUserTenant>
+            where TUserTenant : AbpUserTenant<TTenant, TUser,TUserTenant >, new()
         {
             if (manager == null)
             {
@@ -29,10 +30,11 @@ namespace Abp.Authorization.Users
             return AsyncHelper.RunSync(() => manager.IsGrantedAsync(userId, permissionName));
         }
 
-        public static AbpUserManager<TTenant, TRole, TUser>.AbpLoginResult Login<TTenant, TRole, TUser>(AbpUserManager<TTenant, TRole, TUser> manager, string userNameOrEmailAddress, string plainPassword, string tenancyName = null)
-            where TTenant : AbpTenant<TTenant, TUser>
-            where TRole : AbpRole<TTenant, TUser>, new()
-            where TUser : AbpUser<TTenant, TUser>
+        public static AbpUserManager<TTenant, TRole, TUser, TUserTenant>.AbpLoginResult Login<TTenant, TRole, TUser, TUserTenant>(AbpUserManager<TTenant, TRole, TUser, TUserTenant> manager, string userNameOrEmailAddress, string plainPassword, string tenancyName = null)
+            where TTenant : AbpTenant<TTenant, TUser,TUserTenant>
+            where TRole : AbpRole<TTenant, TUser, TUserTenant>, new()
+            where TUser : AbpUser<TTenant, TUser, TUserTenant>
+            where TUserTenant : AbpUserTenant<TTenant, TUser,TUserTenant>, new()
         {
             if (manager == null)
             {

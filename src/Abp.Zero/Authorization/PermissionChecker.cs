@@ -14,12 +14,14 @@ namespace Abp.Authorization
     /// <typeparam name="TTenant"></typeparam>
     /// <typeparam name="TRole"></typeparam>
     /// <typeparam name="TUser"></typeparam>
-    public abstract class PermissionChecker<TTenant, TRole, TUser> : IPermissionChecker, ITransientDependency
-        where TRole : AbpRole<TTenant, TUser>, new()
-        where TUser : AbpUser<TTenant, TUser>
-        where TTenant : AbpTenant<TTenant, TUser>
+    /// <typeparam name="TUserTenant"></typeparam>
+    public abstract class PermissionChecker<TTenant, TRole, TUser, TUserTenant> : IPermissionChecker, ITransientDependency
+        where TRole : AbpRole<TTenant, TUser, TUserTenant>, new()
+        where TUser : AbpUser<TTenant, TUser, TUserTenant>
+        where TTenant : AbpTenant<TTenant, TUser, TUserTenant>
+        where TUserTenant : AbpUserTenant<TTenant, TUser, TUserTenant>, new()
     {
-        private readonly AbpUserManager<TTenant, TRole, TUser> _userManager;
+        private readonly AbpUserManager<TTenant, TRole, TUser, TUserTenant> _userManager;
 
         public ILogger Logger { get; set; }
 
@@ -28,7 +30,7 @@ namespace Abp.Authorization
         /// <summary>
         /// Constructor.
         /// </summary>
-        protected PermissionChecker(AbpUserManager<TTenant, TRole, TUser> userManager)
+        protected PermissionChecker(AbpUserManager<TTenant, TRole, TUser, TUserTenant> userManager)
         {
             _userManager = userManager;
 

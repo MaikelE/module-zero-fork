@@ -44,11 +44,11 @@
   <ItemGroup>
     <Reference Include="Abp, Version=0.5.12.1, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Abp.0.5.12.1\lib\net451\Abp.dll</HintPath>
+      <HintPath>..\..\..\aspnetboilerplate\src\Abp.EntityFramework\bin\Debug\Abp.dll</HintPath>
     </Reference>
     <Reference Include="Abp.EntityFramework, Version=0.5.12.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Abp.EntityFramework.0.5.12.0\lib\net451\Abp.EntityFramework.dll</HintPath>
+      <HintPath>..\..\..\aspnetboilerplate\src\Abp.EntityFramework\bin\Debug\Abp.EntityFramework.dll</HintPath>
     </Reference>
     <Reference Include="Abp.Web, Version=0.5.12.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -64,11 +64,11 @@
     </Reference>
     <Reference Include="Abp.Zero, Version=0.5.15.1, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Abp.Zero.0.5.15.1\lib\net451\Abp.Zero.dll</HintPath>
+      <HintPath>..\..\src\Abp.Zero.EntityFramework\bin\Debug\Abp.Zero.dll</HintPath>
     </Reference>
     <Reference Include="Abp.Zero.EntityFramework, Version=0.5.15.1, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Abp.Zero.EntityFramework.0.5.15.1\lib\net451\Abp.Zero.EntityFramework.dll</HintPath>
+      <HintPath>..\..\src\Abp.Zero.EntityFramework\bin\Debug\Abp.Zero.EntityFramework.dll</HintPath>
     </Reference>
     <Reference Include="Antlr3.Runtime">
       <HintPath>..\packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
@@ -757,9 +757,9 @@
     <Compile Include="App_Start\ModuleZeroSampleProjectWebModule.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\Startup.cs" />
-    <Compile Include="Controllers\AccountController.cs" />
-    <Compile Include="Controllers\HomeController.cs" />
-    <Compile Include="Controllers\ModuleZeroSampleProjectControllerBase.cs" />
+    <Compile Include="Scripts\Controllers\AccountController.cs" />
+    <Compile Include="Scripts\Controllers\HomeController.cs" />
+    <Compile Include="Scripts\Controllers\ModuleZeroSampleProjectControllerBase.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -780,7 +780,9 @@
       <DependentUpon>Web.config</DependentUpon>
     </None>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="App_Data\" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ModuleZeroSampleProject.Application\ModuleZeroSampleProject.Application.csproj">
       <Project>{EDF5D964-4C0F-4F19-B674-58A38A5E5401}</Project>

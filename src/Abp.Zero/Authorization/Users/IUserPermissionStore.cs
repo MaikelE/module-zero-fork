@@ -8,9 +8,10 @@ namespace Abp.Authorization.Roles
     /// <summary>
     /// Used to perform permission database operations for a user.
     /// </summary>
-    public interface IUserPermissionStore<TTenant, TUser>
-        where TUser : AbpUser<TTenant, TUser>
-        where TTenant : AbpTenant<TTenant, TUser>
+    public interface IUserPermissionStore<TTenant, TUser, TUserTenant>
+        where TUser : AbpUser<TTenant, TUser, TUserTenant>
+        where TTenant : AbpTenant<TTenant, TUser, TUserTenant>
+        where TUserTenant : AbpUserTenant<TTenant, TUser, TUserTenant>
     {
         /// <summary>
         /// Adds a permission grant setting to a user.
