@@ -44,21 +44,6 @@ namespace Abp.Authorization.Users
             }
         }
 
-        public IUserManagementConfiguration UserManagementConfiguration //TODO: Add to constructor?
-        {
-            private get
-            {
-                if (_userManagementConfiguration == null)
-                {
-                    throw new AbpException("Should set UserManagementConfig before use it!");
-                }
-
-                return _userManagementConfiguration;
-            }
-            set { _userManagementConfiguration = value; }
-        }
-        private IUserManagementConfiguration _userManagementConfiguration;
-
         public ILocalizationManager LocalizationManager { get; set; }
 
         public IAbpSession AbpSession { get; set; }
@@ -83,11 +68,13 @@ namespace Abp.Authorization.Users
             IRepository<TTenant> tenantRepository,
             IMultiTenancyConfig multiTenancyConfig,
             IPermissionManager permissionManager,
-            IUnitOfWorkManager unitOfWorkManager)
+            IUnitOfWorkManager unitOfWorkManager,
+            ISettingManager settingManager)
             : base(userStore)
         {
             AbpStore = userStore;
             RoleManager = roleManager;
+            SettingManager = settingManager;
             UserTenantManager = userTenantManager;
             _tenantRepository = tenantRepository;
             _multiTenancyConfig = multiTenancyConfig;
@@ -364,7 +351,17 @@ namespace Abp.Authorization.Users
                     return new AbpLoginResult(AbpLoginResultType.UserIsNotActive);
                 }
                 
-                if (UserManagementConfiguration.IsEmailConfirmationRequiredForLogin && !user.IsEmailConfirmed)
+                bool isEmailConfirmationRequiredForLogin;
+                if (user.TenantId.HasValue)
+                {
+                    isEmailConfirmationRequiredForLogin = await SettingManager.GetSettingValueForTenantAsync<bool>(AbpZeroSettingNames.UserManagement.IsEmailConfirmationRequiredForLogin, user.TenantId.Value);
+                }
+                else
+                {
+                    isEmailConfirmationRequiredForLogin = await SettingManager.GetSettingValueForApplicationAsync<bool>(AbpZeroSettingNames.UserManagement.IsEmailConfirmationRequiredForLogin);
+                }
+
+                if (isEmailConfirmationRequiredForLogin && !user.IsEmailConfirmed)
                 {
                     return new AbpLoginResult(AbpLoginResultType.UserEmailIsNotConfirmed);
                 }
@@ -474,7 +471,7 @@ namespace Abp.Authorization.Users
             }
 
             var oldUserName = Users.Where(u => u.Id == user.Id).Select(u => u.UserName).Single();
-            if (oldUserName == AbpUser<TTenant, TUser,TUserTenant>.AdminUserName && user.UserName != AbpUser<TTenant, TUser,TUserTenant>.AdminUserName)
+            if (oldUserName == AbpUser<TTenant, TUser>.AdminUserName && user.UserName != AbpUser<TTenant, TUser>.AdminUserName)
             {
                 return AbpIdentityResult.Failed(string.Format(L("CanNotRenameAdminUser"), AbpUser<TTenant, TUser,TUserTenant>.AdminUserName));
             }
