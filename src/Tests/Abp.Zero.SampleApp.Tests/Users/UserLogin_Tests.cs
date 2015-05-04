@@ -164,5 +164,29 @@ namespace Abp.Zero.SampleApp.Tests.Users
             loginResult.User.Name.ShouldBe("Owner");
             loginResult.Identity.ShouldNotBe(null);
         }
+        
+        [Fact]
+        public async Task Should_Not_Login_TenancyOwner_With_Correct_Values_In_Tenant1()
+        {
+            Resolve<IMultiTenancyConfig>().IsEnabled = true;
+
+            var loginResult = await _userManager.LoginAsync("userOwner", "123qwe","tenant1");
+            loginResult.Result.ShouldNotBe(AbpLoginResultType.Success);
+            //loginResult.User.Name.ShouldBe("Owner");
+            loginResult.Identity.ShouldBe(null);
+        }
+
+        //[Fact]
+        //public async Task Should_Login_With_Correct_Values_With_MultiTenancy()
+        //{
+        //    Resolve<IMultiTenancyConfig>().IsEnabled = false;
+        //    AbpSession.TenantId = 1; //TODO: We should not need to set this and implement AbpSession instead of TestSession.
+
+        //    var loginResult = await _userManager.LoginAsync("user1", "123qwe");
+        //    loginResult.Result.ShouldBe(AbpLoginResultType.Success);
+        //    loginResult.User.Name.ShouldBe("User");
+        //    loginResult.Identity.ShouldNotBe(null);
+        //}
+
     }
 }

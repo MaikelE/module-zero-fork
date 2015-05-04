@@ -104,24 +104,21 @@ namespace Abp.Authorization.Users
                 return result;
             }
 
+            
+            //create user
+            var createUserResult = await base.CreateAsync(user);
+            if (!createUserResult.Succeeded)
+                return createUserResult;
+            //if it has a tenantId set, add a UserTenant relation record
             if (AbpSession.TenantId.HasValue)
             {
-                 result = await CreateUserTenantAsync(user.Id , AbpSession.TenantId.Value);
-                 if (!result.Succeeded)
-                 {
-                     return result;
-                 }
+                return await CreateUserTenantAsync(user.Id, AbpSession.TenantId.Value);
             }
             else
             {
-                result = await CreateUserTenantAsync(user.Id, null);
-                if (!result.Succeeded)
-                {
-                    return result;
-                }
+                //return result of usercreation
+                return createUserResult;
             }
-
-            return await base.CreateAsync(user);
         }
 
 
@@ -411,7 +408,7 @@ namespace Abp.Authorization.Users
             }
             else
             {
-                identity.AddClaim(new Claim(AbpClaimTypes.TenantId, "0"));
+                identity.AddClaim(new Claim(AbpClaimTypes.TenantId, null));
             }
             //var userTenants = await UserTenantManager.GetAllByUserId(user.Id );
             //if (userTenants.Count(t => t.IsActive == true && t.IsDeleted == false) == 1)
@@ -434,7 +431,7 @@ namespace Abp.Authorization.Users
 
             if (tenantId > 0)
             {
-                var userTenant = user.UserInTenants.ToList().FirstOrDefault(ut => ut.TenantId == tenantId);
+                var userTenant = user.UserInTenants.FirstOrDefault(ut => ut.TenantId == tenantId);
                 if (userTenant == null)
                 {
                     return new UpdateTenantResult(AbpUpdateTenantResultType.InvalidTenancyId);
