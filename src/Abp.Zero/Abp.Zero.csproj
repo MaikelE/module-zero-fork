@@ -98,6 +98,7 @@
     <Compile Include="IdentityFramework\IdentityResultExtensions.cs" />
     <Compile Include="IdentityFramework\AbpIdentityResult.cs" />
     <Compile Include="MultiTenancy\AbpTenantManager.cs" />
+    <Compile Include="MultiTenancy\AbpTenantManagerExtensions.cs" />
     <Compile Include="MultiTenancy\IMayHaveOneOrMoreTenant.cs" />
     <Compile Include="MultiTenancy\IMayHaveTenant.cs" />
     <Compile Include="MultiTenancy\IMustHaveOneOrMoreTenant.cs" />

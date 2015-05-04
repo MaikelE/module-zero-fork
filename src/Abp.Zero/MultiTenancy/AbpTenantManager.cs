@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Abp.Authorization.Roles;
@@ -35,6 +36,8 @@ namespace Abp.MultiTenancy
 
             LocalizationManager = NullLocalizationManager.Instance;
         }
+
+        public virtual IQueryable<TTenant> Tenants { get { return _tenantRepository.GetAll(); } }
 
         public virtual async Task<IdentityResult> CreateAsync(TTenant tenant)
         {
