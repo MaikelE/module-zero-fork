@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace Abp.MultiTenancy
 {
     [Table("AbpUsersTenants")]
-    public class AbpUserTenant<TTenant, TUser, TUserTenant> : FullAuditedEntity<int, TUser>, IMayHaveTenant<TTenant, TUser,TUserTenant>, IPassivable
+    public class AbpUserTenant<TTenant, TUser, TUserTenant> : FullAuditedEntity<int, TUser>,  IPassivable, IHasUserId
         where TTenant : AbpTenant<TTenant, TUser, TUserTenant>
         where TUser : AbpUser<TTenant, TUser,TUserTenant>
         where TUserTenant : AbpUserTenant<TTenant, TUser, TUserTenant>

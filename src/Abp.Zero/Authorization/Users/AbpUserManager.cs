@@ -284,6 +284,8 @@ namespace Abp.Authorization.Users
         [UnitOfWork]
         public virtual async Task<AbpLoginResult> LoginAsync(string userNameOrEmailAddress, string plainPassword, string tenancyName = null)
         {
+            var tenantNameRequiredAtLogin = SettingManager.GetSettingValueForApplicationAsync<bool>(AbpZeroSettingNames.TenantManagement.IsTenantNameRequiredWithLogin);
+
             if (userNameOrEmailAddress.IsNullOrEmpty())
             {
                 throw new ArgumentNullException("userNameOrEmailAddress");
@@ -297,12 +299,14 @@ namespace Abp.Authorization.Users
             using (_unitOfWorkManager.Current.DisableFilter(AbpDataFilters.MayHaveTenant))
             {
                 TUser user;
+                TTenant tenant = null;
+                bool userNeedsToChooseTenant = false;
 
                 if (!_multiTenancyConfig.IsEnabled)
                 {
                     using (_unitOfWorkManager.Current.EnableFilter(AbpDataFilters.MayHaveTenant))
                     {
-                        //Log in with default denant
+                        //Log in with default tenant
                         user = await FindByNameOrEmailAsync(userNameOrEmailAddress);
                         if (user == null)
                         {
@@ -312,26 +316,65 @@ namespace Abp.Authorization.Users
                 }
                 else
                 {
-                    if (string.IsNullOrWhiteSpace(tenancyName))
+                    if (await tenantNameRequiredAtLogin && string.IsNullOrWhiteSpace(tenancyName))
                     {
-                        //Log in as host user
-                        user = await AbpStore.FindByNameOrEmailAsync(null, userNameOrEmailAddress);
+                        return new AbpLoginResult(AbpLoginResultType.NoTenancyNameProvided);
+                    }
+
+                    var hostDisplayName = SettingManager.GetSettingValueForApplicationAsync(AbpZeroSettingNames.TenantManagement.HostDisplayName);                    
+
+                    if ((await hostDisplayName) == tenancyName)
+                    {                        
+                        //Log in as host user if user cannot login as host, then he cannot login.
+                        user = await AbpStore.FindByNameOrEmailAsync(null, userNameOrEmailAddress);                       
                     }
                     else
-                    {
-                        //Log in as tenant user
-                        var tenant = await _tenantRepository.FirstOrDefaultAsync(t => t.TenancyName == tenancyName);
-                        if (tenant == null)
-                        {
-                            return new AbpLoginResult(AbpLoginResultType.InvalidTenancyName);
+                    {                        
+                        if (string.IsNullOrWhiteSpace(tenancyName))
+                        {                            
+                                //no tenant selected, select user and let user schoose tenant
+                            //using (_unitOfWorkManager.Current.EnableFilter(AbpDataFilters.MayHaveTenant))
+                            //{
+                                user = await FindByNameOrEmailAsync(userNameOrEmailAddress);
+                                if (user == null)
+                                {
+                                    return new AbpLoginResult(AbpLoginResultType.InvalidUserNameOrEmailAddress);
+                                }
+                                
+                                if (user.UserInTenants.Count > 1) //if user has multiple tenants let him first choose the tenant
+                                {
+                                    userNeedsToChooseTenant = true;
+                                }
+                            //}
                         }
-
-                        if (!tenant.IsActive)
+                        else
                         {
-                            return new AbpLoginResult(AbpLoginResultType.TenantIsNotActive);
-                        }
+                            //Log in as tenant user
+                            tenant = await _tenantRepository.FirstOrDefaultAsync(t => t.TenancyName == tenancyName);
+                            if (tenant == null)
+                            {
+                                return new AbpLoginResult(AbpLoginResultType.InvalidTenancyName);
+                            }
 
-                        user = await AbpStore.FindByNameOrEmailAsync(tenant.Id, userNameOrEmailAddress);
+                            if (!tenant.IsActive)
+                            {
+                                return new AbpLoginResult(AbpLoginResultType.TenantIsNotActive);
+                            }
+                            user = await AbpStore.FindByNameOrEmailAsync(tenant.Id, userNameOrEmailAddress);
+                            if (user != null)
+                            {
+                                var userTenant = await UserTenantManager.FindByUserIdAndTenantIdAsync(user.Id, tenant.Id);
+                                if (userTenant == null || userTenant.IsDeleted)
+                                {
+                                    return new AbpLoginResult(AbpLoginResultType.UserNotWithTenant);
+                                }
+
+                                if (userTenant == null)
+                                {
+                                    return new AbpLoginResult(AbpLoginResultType.UserNotActiveWithTenant);
+                                }
+                            }
+                        }
                     }
 
                     if (user == null)
@@ -352,9 +395,9 @@ namespace Abp.Authorization.Users
                 }
                 
                 bool isEmailConfirmationRequiredForLogin;
-                if (user.TenantId.HasValue)
+                if (tenant != null)
                 {
-                    isEmailConfirmationRequiredForLogin = await SettingManager.GetSettingValueForTenantAsync<bool>(AbpZeroSettingNames.UserManagement.IsEmailConfirmationRequiredForLogin, user.TenantId.Value);
+                    isEmailConfirmationRequiredForLogin = await SettingManager.GetSettingValueForTenantAsync<bool>(AbpZeroSettingNames.UserManagement.IsEmailConfirmationRequiredForLogin, tenant.Id);
                 }
                 else
                 {
@@ -368,9 +411,23 @@ namespace Abp.Authorization.Users
 
                 user.LastLoginTime = DateTime.Now;
 
+                
                 await Store.UpdateAsync(user);
+                
+                if (userNeedsToChooseTenant)
+                {
+                    return new AbpLoginResult(user); //let the user first choose a tenant
+                }
 
-                return new AbpLoginResult(user, await CreateIdentityAsync(user, DefaultAuthenticationTypes.ApplicationCookie));
+                //log user in with tenantId
+                if (tenant != null)
+                {
+                    return new AbpLoginResult(user, await CreateIdentityAsyncWithTenant(user, DefaultAuthenticationTypes.ApplicationCookie, tenant.Id));
+                }
+                else
+                {
+                    return new AbpLoginResult(user, await CreateIdentityAsync(user, DefaultAuthenticationTypes.ApplicationCookie));
+                }
             }
         }
 
@@ -392,34 +449,23 @@ namespace Abp.Authorization.Users
             return user;
         }
 
-        public async override Task<ClaimsIdentity> CreateIdentityAsync(TUser user, string authenticationType)
-        {
-            var identity = await base.CreateIdentityAsync(user, authenticationType);
-            //if (tenantId>0)
-            //{
-            //    identity.AddClaim(new Claim(AbpClaimTypes.TenantId, tenantId.ToString(CultureInfo.InvariantCulture)));              
-            //}
-            if (user.UserInTenants.Count(t => t.IsActive == true && t.IsDeleted == false) == 1)
+        public async Task<ClaimsIdentity> CreateIdentityAsyncWithTenant(TUser user, string authenticationType, int? tenantId)
+        {            
+            var userTenant = await UserTenantManager.FindByUserIdAndTenantIdAsync(user.Id, tenantId);
+            if (userTenant == null && userTenant.IsDeleted)
             {
-                identity.AddClaim(new Claim(AbpClaimTypes.TenantId, user.UserInTenants.FirstOrDefault(t => t.IsActive == true && t.IsDeleted == false).Id.ToString(CultureInfo.InvariantCulture)));
+                return null;
             }
-            else
-            {
-                identity.AddClaim(new Claim(AbpClaimTypes.TenantId, null));
-            }
-            //var userTenants = await UserTenantManager.GetAllByUserId(user.Id );
-            //if (userTenants.Count(t => t.IsActive == true && t.IsDeleted == false) == 1)
-            //{
-            //    identity.AddClaim(new Claim(AbpClaimTypes.TenantId, userTenants.FirstOrDefault(t => t.IsActive == true && t.IsDeleted == false).Id.ToString(CultureInfo.InvariantCulture)));
-            //}
-            //else
-            //{
-            //    identity.AddClaim(new Claim(AbpClaimTypes.TenantId, "0"));
-            //}
+            var identity = await base.CreateIdentityAsync(user, authenticationType);                
+            identity.AddClaim(new Claim(AbpClaimTypes.TenantId, userTenant.Id.ToString(CultureInfo.InvariantCulture)));
 
             return identity;
         }
 
+        public async override Task<ClaimsIdentity> CreateIdentityAsync(TUser user, string authenticationType)
+        {
+          return await base.CreateIdentityAsync(user, authenticationType);          
+        }
 
         public async Task<UpdateTenantResult> UpdateTenantAsync(TUser user, int tenantId, ClaimsPrincipal claimsPrincipal)
         {
@@ -437,21 +483,7 @@ namespace Abp.Authorization.Users
                 {
                     if (!userTenant.IsActive || userTenant.IsDeleted)
                         return new UpdateTenantResult(AbpUpdateTenantResultType.TenantIsNotActive);
-                }
-                //foreach (var userTenant in )
-                //{
-                //    if ()
-                //}
-                //var tenantsUser = await UserTenantManager.GetAllByUserId(user.Id);
-                //var tenantUser = tenantsUser.FirstOrDefault(ut => ut.TenantId == tenantId);
-                //if (tenantUser == null)
-                //{
-                //}
-                //else
-                //{
-                //    if (!tenantUser.IsActive || tenantUser.IsDeleted)
-                //        return new UpdateTenantResult(AbpUpdateTenantResultType.TenantIsNotActive);
-                //}
+                }               
             }
             if (claimTenant != null)
             {
@@ -470,8 +502,8 @@ namespace Abp.Authorization.Users
                 return result;
             }
 
-            var oldUserName = Users.Where(u => u.Id == user.Id).Select(u => u.UserName).Single();
-            if (oldUserName == AbpUser<TTenant, TUser>.AdminUserName && user.UserName != AbpUser<TTenant, TUser>.AdminUserName)
+            var oldUserName = (await GetUserByIdAsync(user.Id)).UserName;
+            if (oldUserName == AbpUser<TTenant, TUser, TUserTenant>.AdminUserName && user.UserName != AbpUser<TTenant, TUser, TUserTenant>.AdminUserName)
             {
                 return AbpIdentityResult.Failed(string.Format(L("CanNotRenameAdminUser"), AbpUser<TTenant, TUser,TUserTenant>.AdminUserName));
             }
@@ -567,6 +599,13 @@ namespace Abp.Authorization.Users
             public AbpLoginResult(AbpLoginResultType result)
             {
                 Result = result;
+            }
+
+
+            public AbpLoginResult(TUser user)
+                : this(AbpLoginResultType.UserNeedsToChooseTenant)
+            {
+                User = user;
             }
 
             public AbpLoginResult(TUser user, ClaimsIdentity identity)

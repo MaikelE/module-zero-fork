@@ -26,6 +26,7 @@ namespace Abp.Configuration
         /// </summary>
         public virtual int? TenantId { get; set; }
 
+
         /// <summary>
         /// UserId for this setting.
         /// UserId is null if this setting is not user level.

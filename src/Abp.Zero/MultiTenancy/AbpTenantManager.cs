@@ -10,6 +10,8 @@ using Abp.Localization;
 using Abp.Zero;
 using Microsoft.AspNet.Identity;
 using Abp.MultiTenancy;
+using Abp.Configuration;
+using Abp.Zero.Configuration;
 
 namespace Abp.MultiTenancy
 {
@@ -27,20 +29,28 @@ namespace Abp.MultiTenancy
         where TUserTenant : AbpUserTenant<TTenant, TUser, TUserTenant>
     {
         public ILocalizationManager LocalizationManager { get; set; }
-
+       
+        protected ISettingManager SettingManager { get; private set; }
         private readonly IRepository<TTenant> _tenantRepository;
 
-        protected AbpTenantManager(IRepository<TTenant> tenantRepository)
+        protected AbpTenantManager(IRepository<TTenant> tenantRepository,
+            ISettingManager settingManager)
         {
             _tenantRepository = tenantRepository;
-
+            SettingManager = settingManager;
             LocalizationManager = NullLocalizationManager.Instance;
         }
 
         public virtual IQueryable<TTenant> Tenants { get { return _tenantRepository.GetAll(); } }
 
         public virtual async Task<IdentityResult> CreateAsync(TTenant tenant)
-        {
+        {            
+            string hostName = await SettingManager.GetSettingValueForApplicationAsync(AbpZeroSettingNames.TenantManagement.HostDisplayName);
+            if (hostName == tenant.TenancyName || tenant.Name == hostName)
+            {
+                return AbpIdentityResult.Failed(string.Format(L("TenancyNameIsAlreadyTaken"), tenant.TenancyName));
+            }
+
             if (await _tenantRepository.FirstOrDefaultAsync(t => t.TenancyName == tenant.TenancyName) != null)
             {
                 return AbpIdentityResult.Failed(string.Format(L("TenancyNameIsAlreadyTaken"), tenant.TenancyName));
@@ -58,6 +68,12 @@ namespace Abp.MultiTenancy
 
         public async Task<IdentityResult> UpdateAsync(TTenant tenant)
         {
+            string hostName = await SettingManager.GetSettingValueForApplicationAsync(AbpZeroSettingNames.TenantManagement.HostDisplayName);
+            if (hostName == tenant.TenancyName || tenant.Name == hostName)
+            {
+                return AbpIdentityResult.Failed(string.Format(L("TenancyNameIsAlreadyTaken"), tenant.TenancyName));
+            }
+
             if (await _tenantRepository.FirstOrDefaultAsync(t => t.TenancyName == tenant.TenancyName && t.Id != tenant.Id) != null)
             {
                 return AbpIdentityResult.Failed(string.Format(L("TenancyNameIsAlreadyTaken"), tenant.TenancyName));

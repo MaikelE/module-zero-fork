@@ -8,7 +8,7 @@ namespace Abp.Authorization.Users
     /// Used to store a User Login for external Login services.
     /// </summary>
     [Table("AbpUserLogins")]
-    public class UserLogin : Entity<long>
+    public class UserLogin : Entity<long>, IHasUserId
     {
         /// <summary>
         /// Maximum length of <see cref="LoginProvider"/> property.

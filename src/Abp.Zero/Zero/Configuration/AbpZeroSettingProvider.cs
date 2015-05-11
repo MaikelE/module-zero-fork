@@ -15,7 +15,32 @@ namespace Abp.Zero.Configuration
                            "false",
                            new FixedLocalizableString("Is email confirmation required for login."),
                            scopes: SettingScopes.Application | SettingScopes.Tenant
+                           ),
+                        new SettingDefinition(
+                           AbpZeroSettingNames.TenantManagement.IsTenantNameRequiredWithLogin,
+                           "false",
+                           new FixedLocalizableString("Is tenant name required for login."),
+                           scopes: SettingScopes.Application
+                           ),
+                        new SettingDefinition(
+                           AbpZeroSettingNames.TenantManagement.HostDisplayName,
+                           "Host application",
+                           new FixedLocalizableString("Host displayname."),
+                           scopes: SettingScopes.Application
+                           ),
+                        new SettingDefinition(
+                           AbpZeroSettingNames.UserManagement.IsTwoFactorEnabledForLogin,
+                           "false",
+                           new FixedLocalizableString("Two factor login"),
+                           scopes: SettingScopes.Application | SettingScopes.Tenant | SettingScopes.User
+                           ),
+                        new SettingDefinition(
+                           AbpZeroSettingNames.UserManagement.IsTwoFactorRequiredForLogin,
+                           "false",
+                           new FixedLocalizableString("Host displayname."),
+                           scopes: SettingScopes.Application | SettingScopes.Tenant
                            )
+
                    };
         }
     }

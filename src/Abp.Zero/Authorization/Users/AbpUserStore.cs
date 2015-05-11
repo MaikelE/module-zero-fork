@@ -116,11 +116,6 @@ namespace Abp.Authorization.Users
                 return await _userRepository.FirstOrDefaultAsync(user =>
                         (user.UserName == userNameOrEmailAddress || user.EmailAddress == userNameOrEmailAddress)
                          && (user.UserInTenants.FirstOrDefault(ut => ut.TenantId == tenantId) != null));
-
-                   //var Usertenants = users.FirstOrDefault().UserTenants;
-                
-                
-                   //return users.FirstOrDefault(u => u.UserTenants != null && u.UserTenants.FirstOrDefault(ut => ut.TenantId == tenantId) != null);            
             }
         }
 

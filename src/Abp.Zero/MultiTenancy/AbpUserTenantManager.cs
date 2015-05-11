@@ -63,6 +63,14 @@ namespace Abp.MultiTenancy
             return await _userTenantRepository.FirstOrDefaultAsync(id);
         }
 
+        
+        public virtual async Task<TUserTenant> FindByUserIdAndTenantIdAsync(long userId, int? tenantId)
+        {
+            return await _userTenantRepository.FirstOrDefaultAsync(ut => ut.TenantId == tenantId && ut.UserId == userId);
+        }
+
+
+
         public virtual async Task<TUserTenant> GetByIdAsync(int id)
         {
             var tenant = await FindByIdAsync(id);
@@ -79,11 +87,11 @@ namespace Abp.MultiTenancy
             return await _userTenantRepository.GetAllListAsync(ut => ut.UserId == userId); 
         }
 
-        public async Task<ICollection<TUserTenant>> GetAllByTenantId(int tenantId)
+        public async Task<ICollection<TUserTenant>> GetAllByTenantId(int? tenantId)
         {
             return await _userTenantRepository.GetAllListAsync(ut => ut.TenantId == tenantId);
         }
-
+        
         //public async Task<ICollection<TUser>> GetAllUsersByTenantId(int tenantId)
         //{
         //    var list = await _userTenantRepository.GetAllListAsync(ut => ut.TenantId == tenantId);

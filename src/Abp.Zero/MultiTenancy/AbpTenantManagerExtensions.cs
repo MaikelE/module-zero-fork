@@ -7,10 +7,11 @@ namespace Abp.MultiTenancy
     //TODO: Create other sync extension methods.
     public static class AbpTenantManagerExtensions
     {
-        public static TTenant GetById<TTenant, TRole, TUser>(this AbpTenantManager<TTenant, TRole, TUser> tenantManager, int id)
-            where TTenant : AbpTenant<TTenant, TUser>
-            where TRole : AbpRole<TTenant, TUser>
-            where TUser : AbpUser<TTenant, TUser>
+        public static TTenant GetById<TTenant, TRole, TUser, TUserTenant>(this AbpTenantManager<TTenant, TRole, TUser, TUserTenant> tenantManager, int id)
+            where TTenant : AbpTenant<TTenant, TUser, TUserTenant>
+            where TRole : AbpRole<TTenant, TUser, TUserTenant>
+            where TUser : AbpUser<TTenant, TUser, TUserTenant>
+            where TUserTenant : AbpUserTenant<TTenant, TUser, TUserTenant>
         {
             return AsyncHelper.RunSync(() => tenantManager.GetByIdAsync(id));
         }
