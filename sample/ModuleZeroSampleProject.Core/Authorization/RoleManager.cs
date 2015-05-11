@@ -7,7 +7,7 @@ using ModuleZeroSampleProject.Users;
 
 namespace ModuleZeroSampleProject.Authorization
 {
-    public class RoleManager : AbpRoleManager<Tenant, Role, User>
+    public class RoleManager : AbpRoleManager<Tenant, Role, User, UserTenant>
     {
         public RoleManager(RoleStore store, IPermissionManager permissionManager, IRoleManagementConfig roleManagementConfig, IUnitOfWorkManager unitOfWorkManager)
             : base(store, permissionManager, roleManagementConfig, unitOfWorkManager)

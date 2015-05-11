@@ -32,7 +32,7 @@ namespace ModuleZeroSampleProject.Migrations.Data
 
             //Admin user for tenancy owner
 
-            var adminUserForTenancyOwner = context.Users.FirstOrDefault(u => u.UserTenants== null && u.UserName == "admin");
+            var adminUserForTenancyOwner = context.Users.FirstOrDefault(u => u.UserInTenants.Any(ut => ut.Tenant == null) && u.UserName == "admin");
             if (adminUserForTenancyOwner == null)
             {
                 adminUserForTenancyOwner = context.Users.Add(
@@ -54,8 +54,18 @@ namespace ModuleZeroSampleProject.Migrations.Data
                 context.SaveChanges();
             }
 
-            //Default tenant
+            //add admin user to host account
+            if (context.UserTenants.FirstOrDefault(ut => ut.Tenant == null && ut.UserId == adminUserForTenancyOwner.Id) == null)
+            {
 
+                context.UserTenants.Add(new UserTenant()
+                {
+                    UserId = adminUserForTenancyOwner.Id
+                });
+                context.SaveChanges();
+            }
+
+            //Default tenant
             var defaultTenant = context.Tenants.FirstOrDefault(t => t.TenancyName == "Default");
             if (defaultTenant == null)
             {
@@ -64,7 +74,6 @@ namespace ModuleZeroSampleProject.Migrations.Data
             }
 
             //Admin role for 'Default' tenant
-
             var adminRoleForDefaultTenant = context.Roles.FirstOrDefault(r => r.TenantId == defaultTenant.Id && r.Name == "Admin");
             if (adminRoleForDefaultTenant == null)
             {
@@ -92,7 +101,7 @@ namespace ModuleZeroSampleProject.Migrations.Data
 
             //Admin for 'Default' tenant
 
-            var adminUserForDefaultTenant = context.Users.FirstOrDefault(u => u.UserTenants.Any(ut => ut.TenantId == defaultTenant.Id) && u.UserName == "admin");
+            var adminUserForDefaultTenant = context.Users.FirstOrDefault(u => u.UserInTenants.Any(ut => ut.TenantId == defaultTenant.Id) && u.UserName == "admin");
             if (adminUserForDefaultTenant == null)
             {
                 adminUserForDefaultTenant = context.Users.Add(
@@ -131,7 +140,7 @@ namespace ModuleZeroSampleProject.Migrations.Data
             //User 'Emre' for 'Default' tenant
             
 
-            var emreUserForDefaultTenant = context.Users.FirstOrDefault(u => u.Us.Any(ut => ut.TenantId == defaultTenant.Id) && u.UserName == "emre");
+            var emreUserForDefaultTenant = context.Users.FirstOrDefault(u => u.UserInTenants.Any(ut => ut.TenantId == defaultTenant.Id) && u.UserName == "emre");
             if (emreUserForDefaultTenant == null)
             {
                 emreUserForDefaultTenant = context.Users.Add(

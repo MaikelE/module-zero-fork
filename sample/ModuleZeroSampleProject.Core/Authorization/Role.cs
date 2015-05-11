@@ -4,7 +4,7 @@ using ModuleZeroSampleProject.Users;
 
 namespace ModuleZeroSampleProject.Authorization
 {
-    public class Role : AbpRole<Tenant, User>
+    public class Role : AbpRole<Tenant, User, UserTenant>
     {
         public Role()
         {

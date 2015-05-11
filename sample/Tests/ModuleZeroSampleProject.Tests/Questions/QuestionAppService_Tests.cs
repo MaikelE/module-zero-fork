@@ -13,20 +13,23 @@ namespace ModuleZeroSampleProject.Tests.Questions
     {
         private readonly IQuestionAppService _questionAppService;
 
+
+
         public QuestionAppService_Tests()
         {
             _questionAppService = LocalIocManager.Resolve<IQuestionAppService>();
         }
+        
 
         [Fact]
         public void Should_Add_Question_With_Authorized_User()
         {
-            AbpSession.UserId = UsingDbContext(context => context.Users.Single(u => u.UserName == "admin" && u.TenantId == AbpSession.TenantId.Value).Id);
+            AbpSession.UserId = UsingGlobalDbContext(context => context.Users.Single(u => u.UserName == "admin" && u.UserInTenants.Any(ut => ut.TenantId == AbpSession.TenantId.Value)).Id);
 
             const string questionTitle = "Test question title 1";
 
             //Question does not exists now
-            UsingDbContext(context => context.Questions.FirstOrDefault(q => q.Title == questionTitle).ShouldBe(null));
+            UsingAppDbContext(context => context.Questions.FirstOrDefault(q => q.Title == questionTitle).ShouldBe(null));
 
             //Create the question
             _questionAppService.CreateQuestion(
@@ -37,7 +40,7 @@ namespace ModuleZeroSampleProject.Tests.Questions
                 });
 
             //Question is added now
-            var question = UsingDbContext(context => context.Questions.FirstOrDefault(q => q.Title == questionTitle));
+            var question = UsingAppDbContext(context => context.Questions.FirstOrDefault(q => q.Title == questionTitle));
             question.ShouldNotBe(null);
 
             //Vote up the question

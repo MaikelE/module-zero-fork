@@ -12,11 +12,9 @@ namespace ModuleZeroSampleProject.MultiTenancy
     public class UserTenantManager : AbpUserTenantManager<Tenant,  User,UserTenant>
     {
         public UserTenantManager(
-                IRepository<UserTenant>    userTenantRepository,
-                   IRepository<User,long> userRepository,
-            IRepository<Tenant> tenantRepository
+                IRepository<UserTenant>    userTenantRepository
             )
-            : base (userTenantRepository, userRepository, tenantRepository)
+            : base (userTenantRepository)
         {
         }
     }

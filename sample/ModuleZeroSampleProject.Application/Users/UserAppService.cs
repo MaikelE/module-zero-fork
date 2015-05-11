@@ -4,6 +4,7 @@ using Abp.Application.Services.Dto;
 using Abp.AutoMapper;
 using Abp.Domain.Repositories;
 using ModuleZeroSampleProject.Users.Dto;
+using System.Linq;
 
 namespace ModuleZeroSampleProject.Users
 {
@@ -21,7 +22,7 @@ namespace ModuleZeroSampleProject.Users
             return new ListResultOutput<UserDto>
                    {
                        Items = _userRepository
-                           .GetAllList(u => u.TenantId == CurrentSession.TenantId)
+                           .GetAllList(u => u.UserInTenants.Any(ut => ut.TenantId == CurrentSession.TenantId)) //TODO: DataFilter?
                            .MapTo<List<UserDto>>()
                    };
         }

@@ -3,7 +3,7 @@ using ModuleZeroSampleProject.MultiTenancy;
 
 namespace ModuleZeroSampleProject.Users
 {
-    public class User : AbpUser<Tenant, User>
+    public class User : AbpUser<Tenant, User,UserTenant>
     {
         public override string ToString()
         {

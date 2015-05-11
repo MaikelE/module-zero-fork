@@ -21,8 +21,28 @@ namespace ModuleZeroSampleProject.Tests
                     .LifestyleSingleton()
                 );
 
+            LocalIocManager.IocContainer.Register(
+                Component.For<DbConnection>()
+                    .UsingFactoryMethod(Effort.DbConnectionFactory.CreateTransient)
+                    .Named("DbConnection.App")
+                    .LifestyleSingleton()
+                );
+                        
+            //LocalIocManager.IocContainer.Release(LocalIocManager.IocContainer.Resolve<ModuleZeroSampleProjectDbContext>());
+            //register moduleZeroTestDbContext again with named connection...
+            LocalIocManager.IocContainer.Register(
+            Component.For<ModuleZeroSampleProjectDbContext>()
+            .Named("ModuleZeroTestDbContext")
+            .DependsOn(Dependency.OnComponent(
+    typeof(DbConnection),
+    "DbConnection.App"))                    
+                    .LifestyleTransient().IsDefault()
+    );
+
+
             //Creating initial data
-            UsingDbContext(context => new InitialDataBuilder().Build(context));
+            UsingGlobalDbContext(context => new InitialDataBuilder().Build(context));
+            UsingAppDbContext(context => new InitialDataBuilder().BuildAppContext(context));
             
             AbpSession.TenantId = 1;
         }
@@ -34,7 +54,7 @@ namespace ModuleZeroSampleProject.Tests
             modules.Add<ModuleZeroSampleProjectDataModule>();
         }
 
-        public void UsingDbContext(Action<GlobalDbContext> action)
+        public void UsingGlobalDbContext(Action<GlobalDbContext> action)
         {
             using (var context = LocalIocManager.Resolve<GlobalDbContext>())
             {
@@ -43,7 +63,7 @@ namespace ModuleZeroSampleProject.Tests
             }
         }
 
-        public T UsingDbContext<T>(Func<GlobalDbContext, T> func)
+        public T UsingGlobalDbContext<T>(Func<GlobalDbContext, T> func)
         {
             T result;
 
@@ -56,7 +76,7 @@ namespace ModuleZeroSampleProject.Tests
             return result;
         }
 
-        public void UsingDbContext(Action<ModuleZeroSampleProjectDbContext> action)
+        public void UsingAppDbContext(Action<ModuleZeroSampleProjectDbContext> action)
         {
             using (var context = LocalIocManager.Resolve<ModuleZeroSampleProjectDbContext>())
             {
@@ -65,7 +85,7 @@ namespace ModuleZeroSampleProject.Tests
             }
         }
 
-        public T UsingDbContext<T>(Func<ModuleZeroSampleProjectDbContext, T> func)
+        public T UsingAppDbContext<T>(Func<ModuleZeroSampleProjectDbContext, T> func)
         {
             T result;
 
@@ -77,5 +97,6 @@ namespace ModuleZeroSampleProject.Tests
 
             return result;
         }
+
     }
 }

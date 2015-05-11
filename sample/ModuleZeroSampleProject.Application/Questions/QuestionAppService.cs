@@ -118,7 +118,7 @@ namespace ModuleZeroSampleProject.Questions
                 new Answer(input.Text)
                 {
                     Question = question,
-                    CreatorUser = new User_Ref() { Id = currentUser.Id }
+                    CreatorUser = new User_Ref(currentUser)
                 });
 
             _unitOfWorkManager.Current.SaveChanges();
