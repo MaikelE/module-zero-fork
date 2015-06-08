@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Abp.Application.Services;
 using Abp.Application.Services.Dto;
 using Abp.AutoMapper;
-using Abp.Domain.Repositories;
 using ModuleZeroSampleProject.Users.Dto;
 using System.Linq;
 
@@ -10,18 +10,19 @@ namespace ModuleZeroSampleProject.Users
 {
     public class UserAppService : ApplicationService, IUserAppService
     {
-        private readonly IRepository<User, long> _userRepository;
+        private readonly UserManager _userManager;
 
-        public UserAppService(IRepository<User, long> userRepository)
+        public UserAppService(UserManager userManager)
         {
-            _userRepository = userRepository;
+            _userManager = userManager;
         }
 
         public ListResultOutput<UserDto> GetUsers()
         {
             return new ListResultOutput<UserDto>
                    {
-                       Items = _userRepository
+                       Items = _userManager.Users.ToList().MapTo<List<UserDto>>()
+                       Items = _userManager
                            .GetAllList(u => u.UserInTenants.Any(ut => ut.TenantId == CurrentSession.TenantId)) //TODO: DataFilter?
                            .MapTo<List<UserDto>>()
                    };
