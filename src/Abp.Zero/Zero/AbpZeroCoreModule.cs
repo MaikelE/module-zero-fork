@@ -14,11 +14,12 @@ namespace Abp.Zero
         /// <summary>
         /// Current version of the zero module.
         /// </summary>
-        public const string CurrentVersion = "0.5.16.1";
+        public const string CurrentVersion = "0.6.3.4";
 
         public override void PreInitialize()
         {
             IocManager.Register<IRoleManagementConfig, RoleManagementConfig>();
+            IocManager.Register<IUserManagementConfig, UserManagementConfig>();
             IocManager.Register<IAbpZeroConfig, AbpZeroConfig>();
 
             Configuration.Settings.Providers.Add<AbpZeroSettingProvider>();
@@ -35,13 +36,5 @@ namespace Abp.Zero
         {
             IocManager.RegisterAssemblyByConvention(Assembly.GetExecutingAssembly());
         }
-    }
-
-    public class AbpZeroConsts
-    {
-        /// <summary>
-        /// "AbpZero"
-        /// </summary>
-        public const string LocalizationSourceName = "AbpZero";
     }
 }

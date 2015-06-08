@@ -14,7 +14,7 @@ namespace ModuleZeroSampleProject.Authorization
             IRepository<RolePermissionSetting, long> rolePermissionSettingRepository)
             : base(
                 roleRepository,
-                 userRoleRepository,
+                userRoleRepository,
                 rolePermissionSettingRepository)
         {
         }

@@ -36,9 +36,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\aspnetboilerplate\src\Abp.EntityFramework\bin\Debug\Abp.dll</HintPath>
     </Reference>
-    <Reference Include="Abp.Web, Version=0.5.12.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Abp.Web.0.5.12.0\lib\net451\Abp.Web.dll</HintPath>
+    <Reference Include="Abp.Web, Version=0.6.1.1, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Abp.Web.0.6.1.1\lib\net451\Abp.Web.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Abp.Web.Api, Version=0.5.12.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

@@ -66,7 +66,21 @@ namespace Abp.Authorization.Users
         /// </summary>
         public const int MaxPasswordResetCodeLength = 128;
 
-    
+        /// <summary>
+        /// Maximum length of the <see cref="AuthenticationSource"/> property.
+        /// </summary>
+        public const int MaxAuthenticationSourceLength = 64;
+
+      
+
+
+        /// <summary>
+        /// Authorization source name.
+        /// It's set to external authentication source name if created by an external source.
+        /// Default: null.
+        /// </summary>
+        [MaxLength(MaxAuthenticationSourceLength)]
+        public virtual string AuthenticationSource { get; set; }
 
         /// <summary>
         /// Name of the user.

@@ -29,7 +29,7 @@ namespace ModuleZeroSampleProject.Users
                 multiTenancyConfig,
                 permissionManager,
                 unitOfWorkManager,
-              settingManager)
+                settingManager)
         {
         }
     }
