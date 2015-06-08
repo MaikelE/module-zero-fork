@@ -8,9 +8,10 @@ namespace Abp.Authorization.Users
     /// </summary>
     /// <typeparam name="TTenant">Tenant type</typeparam>
     /// <typeparam name="TUser">User type</typeparam>
-    public interface IExternalAuthenticationSource<TTenant, TUser>
-        where TTenant : AbpTenant<TTenant, TUser>
-        where TUser : AbpUser<TTenant, TUser>
+    public interface IExternalAuthenticationSource<TTenant, TUser, TUserTenant>
+        where TTenant : AbpTenant<TTenant, TUser, TUserTenant>
+        where TUser : AbpUser<TTenant, TUser, TUserTenant>
+        where TUserTenant : AbpUserTenant<TTenant, TUser, TUserTenant>
     {
         /// <summary>
         /// Unique name of the authentication source.
@@ -24,9 +25,9 @@ namespace Abp.Authorization.Users
         /// </summary>
         /// <param name="userNameOrEmailAddress">User name or email address</param>
         /// <param name="plainPassword">Plain password of the user</param>
-        /// <param name="tenant">Tenant of the user or null (if user is a host user)</param>
+        /// <param name="tenant">Tenant of the user or null (if user has not chosen a tenant)</param>
         /// <returns>True, indicates that this used has authenticated by this source</returns>
-        Task<bool> TryAuthenticateAsync(string userNameOrEmailAddress, string plainPassword, TTenant tenant);
+        Task<bool> TryAuthenticateAsync(string userNameOrEmailAddress, string plainPassword, TTenant tenant, bool loginInHost);
 
         /// <summary>
         /// This method is a user authenticated by this source which does not exists yet.

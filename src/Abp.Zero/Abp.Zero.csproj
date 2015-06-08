@@ -85,6 +85,8 @@
     <Compile Include="Authorization\PermissionChecker.cs" />
     <Compile Include="Authorization\PermissionGrantInfo.cs" />
     <Compile Include="Authorization\Users\AbpUpdateTenantResultType.cs" />
+    <Compile Include="Authorization\Users\DefaultExternalAuthenticationSource.cs" />
+    <Compile Include="Authorization\Users\IExternalAuthenticationSource.cs" />
     <Compile Include="Authorization\Users\IUserPermissionStore.cs" />
     <Compile Include="Authorization\Roles\RolePermissionSetting.cs" />
     <Compile Include="Authorization\Roles\IRolePermissionStore.cs" />
@@ -116,6 +118,7 @@
     <Compile Include="Authorization\Users\AbpUser.cs" />
     <Compile Include="Authorization\Users\UserLogin.cs" />
     <Compile Include="Uow\ZeroDataFilters.cs" />
+    <Compile Include="Zero\AbpZeroConsts.cs" />
     <Compile Include="Zero\AbpZeroCoreModule.cs" />
     <Compile Include="Utils\Helpers\RandomHelper.cs" />
     <Compile Include="Zero\Configuration\AbpZeroSettingNames.cs" />

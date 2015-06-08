@@ -91,7 +91,7 @@ namespace Abp.Zero.SampleApp.Tests.Ldap
             }
         }
 
-        public class MyLdapAuthenticationSource : LdapAuthenticationSource<Tenant, User>
+        public class MyLdapAuthenticationSource : LdapAuthenticationSource<Tenant, User, UserTenant>
         {
             public MyLdapAuthenticationSource(ILdapSettings settings, IAbpZeroLdapModuleConfig ldapModuleConfig)
                 : base(settings, ldapModuleConfig)

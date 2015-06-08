@@ -15,9 +15,10 @@ namespace Abp.Zero.Ldap.Authentication
     /// </summary>
     /// <typeparam name="TTenant">Tenant type</typeparam>
     /// <typeparam name="TUser">User type</typeparam>
-    public abstract class LdapAuthenticationSource<TTenant, TUser> : DefaultExternalAuthenticationSource<TTenant, TUser>, ITransientDependency
-        where TTenant : AbpTenant<TTenant, TUser>
-        where TUser : AbpUser<TTenant, TUser>, new()
+    public abstract class LdapAuthenticationSource<TTenant, TUser, TUserTenant> : DefaultExternalAuthenticationSource<TTenant, TUser, TUserTenant>, ITransientDependency
+        where TTenant : AbpTenant<TTenant, TUser, TUserTenant>
+        where TUser : AbpUser<TTenant, TUser, TUserTenant>, new()
+        where TUserTenant : AbpUserTenant<TTenant, TUser, TUserTenant>, new()
     {
         /// <summary>
         /// LDAP
@@ -39,7 +40,7 @@ namespace Abp.Zero.Ldap.Authentication
         }
 
         /// <inheritdoc/>
-        public override async Task<bool> TryAuthenticateAsync(string userNameOrEmailAddress, string plainPassword, TTenant tenant)
+        public override async Task<bool> TryAuthenticateAsync(string userNameOrEmailAddress, string plainPassword, TTenant tenant, bool loginInHost)
         {
             if (!_ldapModuleConfig.IsEnabled || !(await _settings.GetIsEnabled(GetIdOrNull(tenant))))
             {

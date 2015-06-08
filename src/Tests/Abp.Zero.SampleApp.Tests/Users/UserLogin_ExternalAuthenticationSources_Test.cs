@@ -55,14 +55,14 @@ namespace Abp.Zero.SampleApp.Tests.Users
             }
         }
 
-        public class FakeExternalAuthenticationSource : DefaultExternalAuthenticationSource<Tenant, User>
+        public class FakeExternalAuthenticationSource : DefaultExternalAuthenticationSource<Tenant, User,UserTenant>
         {
             public override string Name
             {
                 get { return "FakeSource"; }
             }
 
-            public override Task<bool> TryAuthenticateAsync(string userNameOrEmailAddress, string plainPassword, Tenant tenant)
+            public override Task<bool> TryAuthenticateAsync(string userNameOrEmailAddress, string plainPassword, Tenant tenant, bool loginInHost)
             {
                 return Task.FromResult(
                     userNameOrEmailAddress == "fakeuser@mydomain.com" &&

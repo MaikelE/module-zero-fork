@@ -179,10 +179,10 @@ namespace Abp.Authorization.Users
         //[ForeignKey("TenantId")]
         //public virtual TTenant Tenant { get; set; }
 
-        ///// <summary>
-        ///// Tenant Id of this user.
-        ///// </summary>
-        //public virtual int? TenantId { get; set; }
+        /// <summary>
+        /// Last selected tenantId of this user.
+        /// </summary>
+        public virtual int? LastTenantId { get; set; }
         /// <summary>
         /// Relation with tenants
         /// </summary>
