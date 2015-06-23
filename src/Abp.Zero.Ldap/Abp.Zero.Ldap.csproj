@@ -104,6 +104,9 @@
     <EmbeddedResource Include="Ldap\Localization\Source\AbpZero.xml" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Ldap\Localization\Source\AbpZero-zh-CN.xml" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Abp.Zero\Abp.Zero.csproj">
       <Project>{70d916f2-9bff-43da-b3f7-3e0655114d48}</Project>
       <Name>Abp.Zero</Name>
