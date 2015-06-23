@@ -32,14 +32,14 @@ namespace ModuleZeroSampleProject.Migrations.Data
 
             //Admin user for tenancy owner
 
-            var adminUserForTenancyOwner = context.Users.FirstOrDefault(u => u.UserInTenants.Any(ut => ut.Tenant == null) && u.UserName == "admin");
+            var adminUserForTenancyOwner = context.Users.FirstOrDefault(u => u.UserInTenants.Any(ut => ut.Tenant == null) && u.UserName == "systemadmin");
             if (adminUserForTenancyOwner == null)
             {
                 adminUserForTenancyOwner = context.Users.Add(
                     new User
                     {
                         
-                        UserName = "admin",
+                        UserName = "systemadmin",
                         Name = "System",
                         Surname = "Administrator",
                         EmailAddress = "admin@aspnetboilerplate.com",
@@ -87,7 +87,6 @@ namespace ModuleZeroSampleProject.Migrations.Data
             }
 
             //User role for 'Default' tenant
-
             var userRoleForDefaultTenant = context.Roles.FirstOrDefault(r => r.TenantId == defaultTenant.Id && r.Name == "User");
             if (userRoleForDefaultTenant == null)
             {
@@ -101,13 +100,13 @@ namespace ModuleZeroSampleProject.Migrations.Data
 
             //Admin for 'Default' tenant
 
-            var adminUserForDefaultTenant = context.Users.FirstOrDefault(u => u.UserInTenants.Any(ut => ut.TenantId == defaultTenant.Id) && u.UserName == "admin");
+            var adminUserForDefaultTenant = context.Users.FirstOrDefault(u => u.UserInTenants.Any(ut => ut.TenantId == defaultTenant.Id) && u.UserName == "systemadmin");
             if (adminUserForDefaultTenant == null)
             {
                 adminUserForDefaultTenant = context.Users.Add(
                     new User
                     {
-                        UserName = "admin",
+                        UserName = "admin_default",
                         Name = "System",
                         Surname = "Administrator",
                         EmailAddress = "admin@aspnetboilerplate.com",

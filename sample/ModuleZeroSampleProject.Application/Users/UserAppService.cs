@@ -21,10 +21,10 @@ namespace ModuleZeroSampleProject.Users
         {
             return new ListResultOutput<UserDto>
                    {
-                       Items = _userManager.Users.ToList().MapTo<List<UserDto>>()
-                       Items = _userManager
-                           .GetAllList(u => u.UserInTenants.Any(ut => ut.TenantId == CurrentSession.TenantId)) //TODO: DataFilter?
-                           .MapTo<List<UserDto>>()
+                       Items = _userManager.Users.Where(u => u.UserInTenants.Any(ut => ut.TenantId == AbpSession.TenantId)).ToList().MapTo<List<UserDto>>(),
+                       //Items = _userManager
+                       //    .GetAllList(u => u.UserInTenants.Any(ut => ut.TenantId == CurrentSession.TenantId)) //TODO: DataFilter?
+                       //    .MapTo<List<UserDto>>()
                    };
         }
     }

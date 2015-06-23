@@ -314,9 +314,9 @@ namespace Abp.Authorization.Users
             }
             else
             {
-                var tenantNameRequiredAtLogin = SettingManager.GetSettingValueForApplicationAsync<bool>(AbpZeroSettingNames.TenantManagement.IsTenantNameRequiredWithLogin);
+                var tenantNameRequiredAtLogin = true;// SettingManager.GetSettingValueForApplicationAsync<bool>(AbpZeroSettingNames.TenantManagement.IsTenantNameRequiredWithLogin);
                 var hostDisplayName = SettingManager.GetSettingValueForApplicationAsync(AbpZeroSettingNames.TenantManagement.HostDisplayName);
-                if (await tenantNameRequiredAtLogin && string.IsNullOrWhiteSpace(tenancyName))
+                if (/*await*/ tenantNameRequiredAtLogin && string.IsNullOrWhiteSpace(tenancyName))
                 {
                     return new AbpLoginResult(AbpLoginResultType.NoTenancyNameProvided);
                 }
@@ -381,7 +381,8 @@ namespace Abp.Authorization.Users
             using (_unitOfWorkManager.Current.DisableFilter(AbpDataFilters.MayHaveTenant))
             {
                 TUser user;
-                if (await TryLoginFromExternalAuthenticationSources(userNameOrEmailAddress, plainPassword, tenant, LoginInHost))
+                //int? tenantId;
+                if (false /*await TryLoginFromExternalAuthenticationSources(userNameOrEmailAddress, plainPassword, tenant, LoginInHost)*/)//ff uitgezet
                 {
                     if (tenant != null || LoginInHost)
                     {
@@ -407,7 +408,14 @@ namespace Abp.Authorization.Users
                 }
                 else
                 {
-                    user = await AbpStore.FindByNameOrEmailAsync(tenant == null ? (int?)null : tenant.Id, userNameOrEmailAddress);
+                    if (tenant != null || LoginInHost)
+                    {
+                        user = await AbpStore.FindByNameOrEmailAsync(tenant == null ? (int?)null : tenant.Id, userNameOrEmailAddress);                        
+                    }
+                    else
+                    {
+                        user = await AbpStore.FindByNameOrEmailAsync(userNameOrEmailAddress);
+                    }
                     if (user == null)
                     {
                         return new AbpLoginResult(AbpLoginResultType.InvalidUserNameOrEmailAddress);
@@ -426,7 +434,7 @@ namespace Abp.Authorization.Users
                 }
                 if (user != null)
                 {
-                    var userTenant = await UserTenantManager.FindByUserIdAndTenantIdAsync(user.Id, tenant.Id);
+                    var userTenant = await UserTenantManager.FindByUserIdAndTenantIdAsync(user.Id, tenant == null? (int?) null : tenant.Id);
                     if (userTenant != null && userTenant.IsDeleted)
                     {
                         return new AbpLoginResult(AbpLoginResultType.UserNotWithTenant);
