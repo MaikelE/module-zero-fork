@@ -314,11 +314,18 @@ namespace Abp.Authorization.Users
             }
             else
             {
-                var tenantNameRequiredAtLogin = true;// SettingManager.GetSettingValueForApplicationAsync<bool>(AbpZeroSettingNames.TenantManagement.IsTenantNameRequiredWithLogin);
+                var tenantNameRequiredAtLogin = SettingManager.GetSettingValueForApplicationAsync<bool>(AbpZeroSettingNames.TenantManagement.IsTenantNameRequiredWithLogin);
                 var hostDisplayName = SettingManager.GetSettingValueForApplicationAsync(AbpZeroSettingNames.TenantManagement.HostDisplayName);
-                if (/*await*/ tenantNameRequiredAtLogin && string.IsNullOrWhiteSpace(tenancyName))
+                if (string.IsNullOrWhiteSpace(tenancyName))
                 {
-                    return new AbpLoginResult(AbpLoginResultType.NoTenancyNameProvided);
+                    if (await tenantNameRequiredAtLogin)
+                    {
+                        return new AbpLoginResult(AbpLoginResultType.NoTenancyNameProvided);
+                    }
+                    else
+                    {
+                        tenancyName = await hostDisplayName; //als geen tenantname dan hostname om in te loggen
+                    }
                 }
 
                 if ((await hostDisplayName) == tenancyName)
